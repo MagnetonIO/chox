@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "library.html" as library %}
+
+{% block title %}
+{{ super()}}
+Live Captures
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+
+
+<div class="container-fluid content">
+    <button type="button" class="btn"><a href="{{ url_for('run_capture') }}">Run Capture</a></button>
+    <button type="button" class="btn btn-danger"><a href="{{ url_for('stop_capture') }}">Stop Capture</a></button>
+	<div class="col-md-12">
+		{% for category, message in get_flashed_messages(with_categories=true) %}
+		<div class="alert alert-{{ category }}">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			{{ message }}
+		</div>
+		{% endfor %}
+		<br/>
+
+		<div class="row">
+
+			<div class="panel panel-default packets">
+
+			  <div class="panel-body splitter">
+
+
+				<div class="packetList">
+					<table class="table table-condensed table-hover" data-toolbar="#custom-toolbar" data-height="404.5" data-toggle="table" data-show-columns="true">
+					  	<thead>
+					  		<tr>
+						  		<th data-width="100">#</th>
+							  	<th data-width="100" data-field="Time">Time</th>
+							  	<th data-width="100" data-field="Delta">Delta</th>
+							  	<th data-width="150" data-field="Source">Source</th> <!-- <small class="pull-right text-muted">(port)</small> -->
+							  	<th data-width="150" data-field="Destination">Destination</th>
+							  	<th data-width="100">Protocol</th>
+							  	<th data-width="100">Length</th>
+							  	<th data-field="Info">Info</th>
+					  		</tr>
+					  	</thead>
+
+					  	<tbody id="packet_container">
+
+				  		</tbody>
+				  	</table>
+				</div>
+			  	<div class="packetView">
+			  		<div class="spinner text-center hide"><i class="fa fa-spinner fa-spin fa-2x"></i></div>
+			  		<div class="packetPane"></div>
+			  	</div>
+		  	</div>
+		   </div>
+        </div>
+
+
+		<!-- Tags Modal -->
+	</div>
+</div>
+
+
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script src="{{ url_for('static', filename='bootstrap-tagsinput.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap3-typeahead.min.js') }}"></script>
+<script src="{{ url_for('static', filename='jquery.splitter-0.14.0.js') }}"></script>
+
+<script type="text/javascript">
+
+	var tag_list = [{% for tag in tags%} "{{tag}}",{% endfor %}];
+
+	$(document).ready(function(){
+
+		$('a#packetStats').on('click', function(e){
+			e.preventDefault();
+			$('div.packetStats').toggleClass('hide');
+		});
+
+		$('.bootstrap-tagsinput').prepend('<i class="fa fa-tags"></i>');
+
+		$('.splitter').css({height: '100%', width: '100%'}).split({
+		    orientation: 'horizontal',
+		    limit: 2,
+		    position: '50%'
+		});
+
+	   $('a.filter-stream').on('click', function(e){
+	   		window.location.href= window.location.pathname + '?display_filter=' + $(this).data('filter');
+	   });
+
+	   function getDisplayFilter()
+	   {
+	       var qstrings = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	       for (var i = 0; i < qstrings.length; i++) {
+	       	if (qstrings[i].indexOf('display_filter') >= 0){
+		       var filter = qstrings[i].replace('display_filter=', '');
+		       return filter;
+	       	}
+	       }
+	   }
+
+	   var display_filter = decodeURIComponent(getDisplayFilter());
+
+	   if (display_filter != 'undefined') {
+	   	  $('input#display-filter').val(display_filter);
+	   }
+
+
+	   $('input#display-filter').keyup(function(e){
+	   		event.preventDefault();
+
+	   		if (e.keyCode == 13) {
+	   			window.location.href= window.location.pathname + '?display_filter=' + $('input#display-filter').val();
+	   		}
+	   });
+
+	   $('#clear-filter').on('click', function(e){
+	   		e.preventDefault();
+	   		window.location.href= window.location.pathname.split('?')[0];
+	   });
+
+	   $('button.dropdown-toggle').dropdown();
+			$(".bootstrap-tagsinput input").typeahead({ source:tag_list, confirmKeys: [13, 44] });
+
+			$('.fixed-table-container').css('height', $('.top_panel').height()-60);
+
+			$(document.body).on('mouseup', function(){
+				$('.fixed-table-container').css('height', $('.top_panel').height()-60);
+		});
+
+        var socket = io.connect("http://" + document.domain +':' + location.port + '/test');
+        var received_data = [];
+
+        socket.on("newdata", function(msg){
+            var packet = msg.data;
+            console.log("Received data" + packet);
+
+            var new_record = '';
+
+            if (packet.protocol == 'HTTP') {
+                new_record = '<tr class="success">';
+            }else if (packet.protocol == 'TCP') {
+                new_record = '<tr class="info">';
+            }else if (packet.protocol == 'UDP'){
+                new_record = '<tr class="warning">';
+            }else{
+                new_record = "<tr>";
+            }
+
+            new_record += '<td  style="width:100px;">' + packet.no + '</td>';
+            new_record += '<td style="width:100px;">' + packet.time + '</td>';
+            new_record += '<td style="width:100px;">' + '' + '</td>';
+            new_record += '<td style="width:150px;">' + packet.src_ip + '</td>';
+            new_record += '<td style="width:150px;">' + packet.dst_ip + '</td>';
+            new_record += '<td style="width:100px;">' + packet.protocol + '</td>';
+            new_record += '<td style="width:100px;">' + packet.length + '</td>';
+            new_record += '<td>' + packet.info + '</td>';
+            new_record += '</tr>';
+
+            $('#packet_container').append(new_record);
+
+            var scrollBottom = $('.fixed-table-body').height();
+            $('.fixed-table-body').scrollTop(10000);
+        });
+
+        socket.on('error', function(err){
+            console.log(err);
+        })
+
+	   	window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
+
+	});
+</script>
+{% endblock %}
