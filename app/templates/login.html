@@ -25,6 +25,9 @@ Login
 		    <h3 class="panel-title text-center">Login</h3>
 		  </div>
 		  <div class="panel-body">
+            <div class="login-logo">
+                <img src="{{ url_for('static', filename="/images/Chox-Chocks.png") }}" />
+            </div>
 		    {{ wtf.quick_form(form) }} 
 		  </div>
 		</div>
@@ -38,6 +41,7 @@ Login
 {{ super() }}
 <script type="text/javascript">
 	$(document).ready(function(){
+        $("body").css('background-color', "#595959");
 		$('input#username').focus();
 	});
 </script>

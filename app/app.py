@@ -52,7 +52,14 @@ APlist = []
 CommPairList = []
 lock = threading.Lock()
 sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, socketio, False)
+
+deviceStatus = {}
 isRunning = False
+isIRouterRunning = False
+isERouterRunning = False
+isIFirewallRunning = False
+isEFirewallRunning = False
+isSwitchRunning = False
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -192,6 +199,21 @@ def home():
 
     else:
         
+        global deviceStatus
+        global isRunning
+        global isIRouterRunning
+        global isERouterRunning
+        global isIFirewallRunning
+        global isEFirewallRunning
+        global isSwitchRunning
+
+        deviceStatus['irouter'] = isIRouterRunning
+        deviceStatus['erouter'] = isERouterRunning
+        deviceStatus['ifirewall'] = isIFirewallRunning
+        deviceStatus['efirewall'] = isEFirewallRunning
+        deviceStatus['swtch'] = isSwitchRunning
+        deviceStatus['livecapture'] = isRunning
+
         tag = request.args.get('tag')
 
         if tag:
@@ -205,7 +227,29 @@ def home():
 
         tags = set([x.name for x in Tag.query.all()])
 
-        return render_template('home.html', form=form, traceFiles=traceFiles, tags=tags)
+        return render_template('home.html', form=form, data=deviceStatus, traceFiles=traceFiles, tags=tags)
+
+@app.route('/pcap')
+@login_required
+def pcap():
+
+    form = TempPasswordForm()
+
+
+    tag = request.args.get('tag')
+
+    if tag:
+        traceFiles = [TraceFile.query.filter_by(id=x.file_id).first() for x in Tag.query.filter_by(name=tag).all()]
+        # For future use of filtering just one users' files
+        # traceFiles = [TraceFile.query.filter_by(user_id=current_user.id).filter_by(id=x.file_id).first() for x in Tag.query.filter_by(name=tag).all()]
+    else:
+        traceFiles = TraceFile.query.all()
+        # For future use of filtering just one users' files
+        # traceFiles = TraceFile.query.filter_by(user_id=current_user.id).all()
+
+    tags = set([x.name for x in Tag.query.all()])
+
+    return render_template('pcap.html', form=form, traceFiles=traceFiles, tags=tags)
 
 @app.route('/captures/<file_id>')
 @login_required
@@ -477,35 +521,44 @@ def upload_file():
     return redirect(url_for('home'))
 
 #@app.route('/livecapture')
-@socketio.on('connect', namespace="/test")
-def test_connect():
+@socketio.on('connect', namespace="/livecapture")
+def livecapture_connect():
    print('---connected---')
 
 
-@app.route('/stop_capture')
+@app.route('/stop_capture', methods=['POST'])
 @login_required
 def stop_capture():
     global sniffer
     global isRunning
 
-    sniffer.stop()
-    sniffer.join()
+    try:
+        sniffer.stop()
+        sniffer.join()
+        isRunning = False
+    except Exception as e:
+        log('error', 'Exception: %s' % e)
+        return render_template('500.html', e=e), 500
+    return json.dumps({'status':200})
 
-    return render_template('livecaptures.html')
-
-@app.route('/run_capture')
+@app.route('/run_capture', methods=['POST'])
 @login_required
 def run_capture():
     global sniffer
     global isRunning
 
-    sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, socketio, False)
-    sniffer.start()
-    return "Monitoring service is starting"
+    try:
+        sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, socketio, False)
+        sniffer.start()
+        isRunning = True
+    except Exception as e:
+        log('error', 'Exception: %s' % e)
+        return render_template('500.html', e=e), 500
+    return json.dumps({'status':200})
 
-@app.route('/test')
+@app.route('/livecapture')
 @login_required
-def test():
+def livecapture():
    global isRunning
    return render_template('livecaptures.html')
 
@@ -634,5 +687,5 @@ manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', debug=True, threaded=True)
-    sniffer.start()
+    #sniffer.start()
     socketio.run(app)

@@ -1,36 +1,110 @@
-{% extends "layout.html" %} 
-{% import "bootstrap/wtf.html" as wtf %} 
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
 {{ super()}}
 Cloud-Pcap
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
 {{ super() }}
 
 
-<div class="container-fluid content">
-	
-	<div class="col-md-12">
-		{% for category, message in get_flashed_messages(with_categories=true) %} 
+<div class="content">
+
+	<div class="col-lg-12">
+		{% for category, message in get_flashed_messages(with_categories=true) %}
 		<div class="alert alert-{{ category }}">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 			{{ message }}
 		</div>
 		{% endfor %}
 		<br/>
-		
+
+        <div class="row">
+			<div class="col-lg-12 col-md-12">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						Devices
+						<small class="pull-right">5 Devices</small>
+					</div>
+					<div class="panel-body">
+						<table class="" data-toggle="table" data-sort-name="no" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[2,10, 20, 50]" data-search="true">
+							<thead>
+                                <tr>
+                                    <th data-field="no" data-sortable="true">#</th>
+                                    <th data-field="type" data-sortable="true">Type</th>
+                                    <th data-field="name" data-sortable="true">Name</th>
+                                    <th data-field="status" data-sortable="true">Status</th>
+                                </tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>1</td>
+									<td>Internal Router</td>
+									<td>Router1</td>
+									<td>
+                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
+                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
+                                    </td>
+								</tr>
+                                <tr>
+									<td>2</td>
+									<td>Internal Edge Router</td>
+									<td>Router2</td>
+									<td>
+                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
+                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
+                                    </td>
+								</tr>
+
+                                <tr>
+									<td>3</td>
+									<td>Internal Firewall</td>
+									<td>Firewall1</td>
+									<td>
+                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
+                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
+                                    </td>
+								</tr>
+
+                                <tr>
+									<td>4</td>
+									<td>Internal Edge Firewall</td>
+									<td>Firewall2</td>
+									<td>
+                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
+                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
+                                    </td>
+								</tr>
+
+                                <tr>
+									<td>5</td>
+									<td>Switch</td>
+									<td>switch</td>
+									<td>
+                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
+                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
+                                    </td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+		</div>
 
 		<div class="row">
-			<div class="col-lg-9 col-md-9 tracefiles">
-				<div class="panel panel-default">
+
+            <div class="col-lg-6 col-md-6 tracefiles">
+				<div class="panel panel-primary">
 					<div class="panel-heading">
 						Trace Files
 						<small class="pull-right">{{ traceFiles|length }} Capture Files</small>
 					</div>
 					<div class="panel-body tracefiles">
-						<table class="" data-toggle="table" data-height="518" data-sort-name="date" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[10, 20, 50]" data-search="true">
+						<table class="" data-toggle="table" data-sort-name="date" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[10, 20, 50]" data-search="true">
 							<thead>
 							<tr>
 								<th data-field="name" data-sortable="true">Name</th>
@@ -59,129 +133,93 @@ Cloud-Pcap
 					</div>
 				</div>
 			</div>
-			<div class="col-lg-3 col-md-3">
-				<div class="panel panel-default" >
-					<div class="panel-heading">Tags
-
-						<a href="{{ url_for('home') }}"><i class="fa fa-ban text-danger pull-right"></i></a>
+			<div class="col-lg-6 col-md-6">
+				<div class="panel panel-primary" >
+					<div class="panel-heading">Live Capture
 					</div>
 					<div class="panel-body">
-						<ul class="list-group">
-						
-						{% for tag in tags %}
-							<a href="{{ url_for('home', tag=tag) }}"><button class="tag-btn btn btn-sm btn-primary">{{ tag }}</button></a>
-						{% endfor %}
-						</ul>
+						<table class="" data-toggle="table" data-sort-name="no" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[10, 20, 50]" data-search="true">
+							<thead>
+							<tr>
+								<th data-field="no" data-sortable="true">#</th>
+								<th data-field="type" data-sortable="true">Type</th>
+								<th data-field="name" data-sortable="true">Name</th>
+								<th data-field="status" data-sortable="true">Status</th>
+							</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>1</td>
+									<td>TShark</td>
+									<td>TShark</td>
+									<td>
+                                            <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="stop_btn" class="shark_btn"></img>
+                                            <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="run_btn" class="shark_btn"></img>
+
+                                    </td>
+								</tr>
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		
-
-		<!-- Temp Password Modal -->
-		<div class="modal fade" id="tempPasswordModal">
-		  <div class="modal-dialog">
-		    <div class="modal-content">
-		      <div class="modal-header">
-		        
-		        <h4 class="modal-title">Temporary Password</h4>
-		      </div>
-		      <div class="modal-body">
-		      	<p>Hi {{current_user.username|upper }}, you currently have a temporary password and must change it to continue.</p>
-		        <form class="form" method="post" role="form">
-		          {{ form.hidden_tag() }}
-		          {{ wtf.form_errors(form, hiddens="only") }}
-
-		          {{ wtf.form_field(form.temp_password) }}
-		          {{ wtf.form_field(form.new_password1) }}
-		          {{ wtf.form_field(form.new_password2) }}
-		      </div>
-		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-		        {{ wtf.form_field(form.submit, button_map={'submit': 'primary'}) }}
-		      </div>
-		        </form>
-		    </div><!-- /.modal-content -->
-		  </div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
-
-		<!-- Delete Modal -->
-		<div class="modal fade" id="deleteModal">
-		  <div class="modal-dialog">
-		    <div class="modal-content">
-		      <div class="modal-header">
-		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-		        <h4 class="modal-title">Delete Capture File</h4>
-		      </div>
-		      <div class="modal-body">
-		        <p></p>
-		      </div>
-		      <div class="modal-footer">
-		      	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    			<button type="button" class="btn btn-danger"><a id="confirmDelete">Confirm Delete</a></button>
-		      </div>
-		    </div><!-- /.modal-content -->
-		  </div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
-		
 	</div>
 </div>
-<div class="dropzone-previews text-center">
-	<div class="well">
-	<h4 class="">Drag pcaps here or  
-	  <button class="btn btn-primary start dropzone-label">
-          <i class="fa fa-upload"></i>
-          <span>Upload</span>
-      </button>
-      </div>
-    </h4>
-</div>
+
 
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 
-<script src="{{ url_for('static', filename='dropzone.min.js') }}"></script>
-
 <script type="text/javascript">
-	Dropzone.autoDiscover = false;
 
 	$(document).ready(function(){
+        var socket = io.connect("http://" + document.domain +':' + location.port + '/livecapture');
+        $('#stop_btn').hide();
+        $('#run_btn').show();
 
-		{% if current_user.temp_password == True %}
+        $('#run_btn').click(function(){
+            $.ajax({
+                url: '/run_capture',
+                type: 'POST',
+                success: function(response){
+                    $('#stop_btn').show();
+                    $('#run_btn').hide();
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        });
 
-			$('#tempPasswordModal').on('shown.bs.modal', function (e) {
-				$('input#temp_password').focus();
-			});
+        $('#stop_btn').click(function(){
+            $.ajax({
+                url: '/stop_capture',
+                type: 'POST',
+                success: function(response){
+                    $('#stop_btn').hide();
+                    $('#run_btn').show();
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        });
 
-			$('#tempPasswordModal').modal(show=true);
+        socket.on("newdata", function(msg){
+            $('#stop_btn').show();
+            $('#run_btn').hide();
 
-		{% endif %}
+        });
 
-		$('.deleteButton').on('click', function(){
-			var file_id = $(this).data('id');
-			var file_name = $(this).data('name');
-			$('#deleteModal .modal-body p').html('Are you sure you want to delete ' + file_name + '?');
-			$('#confirmDelete').attr('href', 'captures/delete/' + file_id);
-		});
+        socket.on('error', function(err){
+            $('#stop_btn').hide();
+            $('#run_btn').show();
+        })
 
-		var captureUpload = new Dropzone('.dropzone-previews', {
-			url: "{{ url_for('api_upload_file', token=1) }}",
-			previewsContainer: ".dropzone-previews",
-			clickable: '.dropzone-label',
-			maxFilesize: 50,
-			init: function() {
-			    this.on("success", function(file) {
-			    	location.reload();
-			    });
-			  }
-		});
-
-		$('button.dropdown-toggle').dropdown();
-
-		window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
 
 	});
 </script>

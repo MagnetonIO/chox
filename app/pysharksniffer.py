@@ -125,7 +125,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         data['length'] = pkt_length
         data['detail'] = detail
 
-        self.socketio.emit('newdata', {'data': data}, namespace='/test')
+        self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
         #     old_stdout = sys.stdout
         #     sys.stdout = mystdout = StringIO()
         #

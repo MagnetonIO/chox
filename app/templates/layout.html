@@ -14,6 +14,7 @@
 <!-- <script src="{{ url_for('static', filename='highcharts.js') }}"></script> -->
 <script src="{{ url_for('static', filename='chartkick.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap-table.min.js') }}"></script>
+<script src="{{ url_for('static', filename='modernizr.js') }}"></script>
 <!--<script src="static/js/app.js"></script>-->
 {% endblock %}
 
@@ -21,33 +22,30 @@
 
 {% block styles %}
 {{ super() }}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-table.min.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-tagsinput.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropzone.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='sidebar.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery.splitter.css') }}">
 <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 {% endblock %}
     
 {% block content %}
+    {% if current_user.is_authenticated() %}
 	<div class="navbar navbar-default navbar-fixed-top" role="navigation"> 
 		<div class="container-fluid">
-	    	<div class="navbar-header">
-		    	<button type="button" class="navbar-toggle"	data-toggle="collapse" data-target=".navbar-collapse"> 
-			    	<span class="sr-only">Toggle navigation</span> 
-			    	<span class="icon-bar"></span>
-			    	<span class="icon-bar"></span>
-			    	<span class="icon-bar"></span> 
-		    	</button>
-		    	<a class="navbar-brand" href="/">CHOX</a>
-	    	</div>
+
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/"><img class="brand-img" src="{{ url_for('static', filename="/images/Chox-Chocks.png") }}" /></a>
+                </div>
+
+
 	    	<div class="navbar-collapse collapse"> 
-	    	<ul class="nav navbar-nav">
-		    	{% if current_user.is_authenticated() %}
-			    	 
-		    	{% endif %}
-	    	</ul>
+	    	<ul class="nav navbar-nav"></ul>
+
 	    	<ul class="nav navbar-nav navbar-right">
 		    	{% if current_user.is_authenticated() %}
 
@@ -65,22 +63,68 @@
 	    	          </ul>
 	    	        </li>
 		    	{% else %}
-			    	<li><a href="{{ url_for('login') }}">Sign In</a></li> 
+			    	<!--<li><a href="{{ url_for('login') }}">Sign In</a></li>-->
 		    	{% endif %}
 	    	</ul>
 	        </div>
 	    </div>
 	</div>
-	<div id="wrapper">
+    {% endif %}
+	<div class="wrapper-container">
+        {% if current_user.is_authenticated() %}
+            <!--<button data-toggle="collapse" data-target="#new">New</button>
 
+            <div id="new" class="collapse">
+                <div class="row">
+                    <div class="col-md-4">1</div>
+                    <div class="col-md-4">2</div>
+                    <div class="col-md-4">3</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">4</div>
+                    <div class="col-md-4">5</div>
+                    <div class="col-md-4">6</div>
+                </div>
+            </div> -->
+            <main class="cd-main-content">
+                <nav class="cd-side-nav">
+                    <ul>
+                        <li class="has-children dashboard main-menu">
+                            <a href="/"><i class="fa-li fas fa-tachometer-alt"></i>Dashboard</a>
+                            <ul class="sub-menu">
+                                <li><a href="/livecapture"><i class="fa-li fas fa-stream"></i>Live Capture</a></li>
+                                <li><a href="/pcap"><i class="fa-li fas fa-chart-pie"></i>PCAP File</a></li>
+                            </ul>
+                        </li>
+                        <li class="archive main-menu">
+                            <a href="#0"><i class="fa-li fas fa-sitemap"></i>Archive</a>
+                        </li>
+
+                        <li class="has-children settings main-menu">
+                            <a href="#0"><i class="fa-li fa fa-cog"></i>Settings</a>
+                            <ul class="sub-menu">
+                                <li><a href="/users"><i class="fa-li fa fa-users"></i>Manage Users</a></li>
+                                <li><a href="#0"><i class="fa-li fas fa-suitcase-rolling"></i>Manage Roles</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div id="wrapper">
+
+        {% endif %}
 	
     
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-
+    <script src="{{ url_for('static', filename='jquery.menu-aim.js') }}"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
 <script type="text/javascript">
 	$('a.dropdown-toggle').dropdown();
+
 </script>
+
 {% endblock %}
