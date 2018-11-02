@@ -132,7 +132,7 @@ def get_uuid():
     return base64.urlsafe_b64encode('test'.encode('UTF-8')).decode('ascii')
 
 # Create DB tables and default admin user if they don't exist
-def init_db(username='admin', password='cloudpcap'):
+def init_db(username='admin', password='chox'):
     print('Initizializing DB')
     db.create_all()
     admin = User(username=username, password=password, role='admin', token=get_uuid())
