@@ -244,7 +244,7 @@ if __name__ == "__main__":
     APlist = []
     CommPairList = []
     while True:
-        sniffer = PysharkMainSniffer("eth0", lock, APlist, CommPairList, False)
+        sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, False)
         print("Main sniffer started")
         sniffer.start()
         #x = raw_input("sdadsa")

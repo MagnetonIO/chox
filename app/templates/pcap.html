@@ -168,7 +168,7 @@ Cloud-Pcap
 		});
 
 		var captureUpload = new Dropzone('.dropzone-previews', {
-			url: "{{ url_for('api_upload_file', token=1) }}",
+			url: "{{ url_for('api_upload_file', token=current_user.token) }}",
 			previewsContainer: ".dropzone-previews",
 			clickable: '.dropzone-label',
 			maxFilesize: 50,
