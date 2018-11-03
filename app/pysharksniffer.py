@@ -7,6 +7,7 @@ from datetime import datetime
 from random import random
 from flask_socketio import SocketIO, emit
 
+SAVE_FOLDER_PATH = 'static/tracefiles/'
 class PysharkSniffer(threading.Thread): # This class starts the PyShark master sniffer that updates a list of communicating APs and a list of established communications
     def __init__(self, interface_string, lock, APlist, CommPairList, socketio, intervals=True, timeout=10, sleep=10):
         threading.Thread.__init__(self)
@@ -21,47 +22,42 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         self.sleep = sleep
         self.on = False
         self.socketio = socketio
+        self.output_file = ''
 
     def stop(self):
         self._stopper.set()
+        return self.filename
 
     def stopped(self):
         return self._stopper.isSet()
 
     def run(self):
-        self.cap = pyshark.LiveCapture(interface=self.interface)
         self.start_time = datetime.now()
+
+        self.cap = pyshark.LiveCapture(interface=self.interface, output_file=datetime.now().isoformat())
+
         self.frame_no = 0
-
-        while True:
-
-            try:
-                self.on = True
-                if self.intervals:
-                    self.cap.apply_on_packets(self.perPacket, timeout=self.timeout)
-                else:
-                    self.cap.apply_on_packets(self.perPacket)
-            except Exception as e:
-                print(e)
-                print("Timeout")
-                self.on = False
-            time.sleep(self.sleep)
-
-
-            #time.sleep(1)
-
-
-
-    def perPacket(self, packet):
-        data = {}
+        #self.cap.set_debug()
+        self.filename = datetime.strftime(datetime.now(), '%Y%m%d%s')  + '.pcap'
+        self.output_file = SAVE_FOLDER_PATH + self.filename
+        capture = pyshark.LiveCapture(interface=self.interface, output_file = self.output_file)
+        for p in capture.sniff_continuously():
+            self.perPacket(p)
+        # while True:
+        #
+        #     try:
+        #         self.on = True
+        #         if self.intervals:
+        #             self.cap.apply_on_packets(self.perPacket, timeout=self.timeout)
+        #         else:
+        #             self.cap.apply_on_packets(self.perPacket)
+        #     except Exception as e:
+        #         print(e)
+        #         print("Timeout")
+        #         self.on = False
+        #     time.sleep(self.sleep)
+    def getDetail(self, packet):
         detail = ''
-
-        time = (datetime.now() - self.start_time).total_seconds()
-        protocol = packet.transport_layer
-        src_ip = packet.ip.src
-        dst_ip = packet.ip.dst
-        pkt_length = packet.captured_length
-        self.frame_no = self.frame_no + 1
 
         for line in packet.__str__().split('\n'):
             if line == 'self._packet_string':
@@ -114,56 +110,80 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
                 detail += '<p><strong>%s</strong> %s</p>\n' % (keyword, value)
 
         detail += '</div></div></div>'
-        #print('**********')
-        #print(detail)
+
+        return detail
+    def get_ip_version(self, packet):
+        for layer in packet.layers:
+            if layer._layer_name == 'ip':
+                return 4
+            elif layer._layer_name == 'ipv6':
+                return 6
+
+    def perPacket(self, packet):
+        data = {}
+
+
+        time = (datetime.now() - self.start_time).total_seconds()
+        pkt_length = packet.captured_length
+        self.frame_no = self.frame_no + 1
+
+        protocol = packet.transport_layer
+        detail = self.getDetail(packet)
+        ip_version = self.get_ip_version(packet)
+        highest_layer = packet.highest_layer
+        if ip_version == 4:
+            ip = packet.ip
+
+        elif ip_version == 6:
+            ip = packet.ipv6
+
+        if protocol == 'TCP':
+            src_ip = ip.src
+            dst_ip = ip.dst
+            protocol = 'TCP'
+        elif protocol == 'UDP':
+            try:
+                src_ip = ip.src
+                dst_ip = ip.dst
+                protocol = packet.transport_layer
+            except Exception as e:
+                print(e)
+        else:
+            if highest_layer != 'ARP':
+                print(highest_layer)
+                try:
+                    src_ip = ip.src
+                except Exception as e:
+                    src_ip = ''
+
+                try:
+                    dst_ip = ip.dst
+                except Exception as e:
+                    dst_ip = ''
+
+                protocol = highest_layer
+            else:
+                src_ip = ''
+                dst_ip = 'Broadcast'
+                protocol = highest_layer
 
         data['time'] = time
         data['no'] = self.frame_no
-        data['src_ip'] = src_ip
-        data['dst_ip'] = dst_ip
+        try:
+            data['src_ip'] = src_ip
+            data['dst_ip'] = dst_ip
+        except Exception as e:
+            print(e)
         data['protocol'] = protocol
         data['length'] = pkt_length
         data['detail'] = detail
 
-        self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
-        #     old_stdout = sys.stdout
-        #     sys.stdout = mystdout = StringIO()
-        #
-        #     sys.stdout = old_stdout
-        #     for line in mystdout.getvalue().split('\n'):
-        #         print('!!!!!!!!!!!!!!!!!!!!', line)
-        # # first check what kind of packet we have. Data or WLAN_MGT?
-        #     if packet.highest_layer == "DATA": # if packet is a data packet (remember, we're only getting communicating APs)
-        #         if self.inAPList(packet) is False: # If AP BSSID is not recognized, add it to APList. If already in list, do nothing
-        #             self.APlist.append(AccessPoint.AccessPoint(packet.wlan.bssid, 1))
-        #             print("Added new AP in APList")
-        #         if self.inCommPairList(packet) is False:
-        #             self.lock.acquire()
-        #             self.append_new_comm_pair(packet)
-        #             self.lock.release()
-        #     elif packet.highest_layer == "WLAN_MGT": # if packet is a wlan management packet (hopefully beacon)
-        #         if packet.wlan.fc_subtype == "8": # this means it's a beacon frame
-        #             if self.inAPList(packet) is True: # If AP BSSID is recognized, try to update the AP with the SSID and encryption type
-        #                 index = self.getIndexinAPList(packet)
-        #                 if not self.APlist[index].SSID:
-        #                     self.APlist[index].setName(packet.wlan_mgt.ssid)
-        #                 if not self.APlist[index].encryption: # if encryption has not yet been set
-        #                     self.APlist[index].setEncryption(self.getEncryption(packet))
-        #                 #long ass condition coming up. Simply states that "if encryption and SSID are known while pass is not yet known and passfile has not yet been checked."
-        #                 if self.APlist[index].encryption and self.APlist[index].SSID and not self.APlist[index].password and self.APlist[index].passMightBeInFile:
-        #                     password = self.APlist[index].getPasswordFromFile()
-        #                     if password: # if password was found in file
-        #                         self.APlist[index].setPassword(password)  # set the password and...
-        #                         self.APlist[index].startInterface(self.interface)  # ...start the interface
-        #                         # if self.APlist[index].openInterface:  # if opened successfully...
-        #                         #     sniffsniff = scapysniffer.ScapySniffer(self.APlist[index].decryptSubprocess.tap, self.lock, self.CommPairList)  # ...start scapy sniffer for this AP
-        #                         #     sniffsniff.start()
-        #                     else:
-        #                         self.APlist[index].passMightBeInFile = False
         if self.stopped():
             sys.exit()
             print('stopped')
-            pass
+        else:
+            self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
+            #pass
 
     def getEncryption(self, packet): # takes beacon frame as input. returns the type of encryption used.
         try:
@@ -243,12 +263,12 @@ if __name__ == "__main__":
     lock = threading.Lock()
     APlist = []
     CommPairList = []
-    while True:
-        sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, False)
-        print("Main sniffer started")
-        sniffer.start()
-        #x = raw_input("sdadsa")
-        sniffer.stop()
-        sniffer.join()
-        print("Main sniffer stopped")
+    #while True:
+    sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, False)
+    print("Main sniffer started")
+    sniffer.start()
+    #x = raw_input("sdadsa")
+    #sniffer.stop()
+    #sniffer.join()
+    #print("Main sniffer stopped")
     #x = raw_input("sdasda")

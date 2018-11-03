@@ -80,6 +80,8 @@
         var tag_list = [{% for tag in tags%} "{{tag}}",{% endfor %}];
 
         $(document).ready(function(){
+            var qPackets = [];
+            var qLen = 5;
 
             $('a#packetStats').on('click', function(e){
                 e.preventDefault();
@@ -170,6 +172,14 @@
                 new_record += '<td style="width:100px;">' + packet.length + '</td>';
                 new_record += '<td>' + packet.info + '</td>';
                 new_record += '</tr>';
+
+                if (qPackets.length < qLen){
+
+                } else {
+                    $('#packet_container tr:first-child').remove();
+                    qPackets.shift();
+                }
+                qPackets.push(packet.no);
 
                 $('#packet_container').append(new_record);
                 $('#stop_btn').show();

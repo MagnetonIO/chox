@@ -533,9 +533,27 @@ def stop_capture():
     global isRunning
 
     try:
-        sniffer.stop()
+        filename = sniffer.stop()
         sniffer.join()
         isRunning = False
+
+        filetype = splitext(filename)[1].strip('.')
+        uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
+
+        new_file = TraceFile(id=str(uuid.uuid4())[:8],
+            name=secure_filename(splitext(filename)[0]),
+            user_id = current_user.id,
+            filename = filename,
+            filetype = filetype,
+            filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename)),
+            packet_count = get_capture_count(filename),
+            date_added = datetime.datetime.now()
+            )
+
+        db.session.add(new_file)
+        db.session.commit()
+        db.session.refresh(new_file)
+
     except Exception as e:
         log('error', 'Exception: %s' % e)
         return render_template('500.html', e=e), 500
@@ -687,5 +705,5 @@ manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', debug=True, threaded=True)
-    #sniffer.start()
+    sniffer.start()
     socketio.run(app, host="0.0.0.0")
