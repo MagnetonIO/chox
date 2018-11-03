@@ -164,6 +164,24 @@ Chox
 				</div>
 			</div>
 		</div>
+        		<!-- Delete Modal -->
+		<div class="modal fade" id="deleteModal">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title">Delete Capture File</h4>
+		      </div>
+		      <div class="modal-body">
+		        <p></p>
+		      </div>
+		      <div class="modal-footer">
+		      	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    			<button type="button" class="btn btn-danger"><a id="confirmDelete">Confirm Delete</a></button>
+		      </div>
+		    </div><!-- /.modal-content -->
+		  </div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
 
 	</div>
 </div>
@@ -220,6 +238,14 @@ Chox
             $('#run_btn').show();
         })
 
+        $('.deleteButton').on('click', function(){
+			var file_id = $(this).data('id');
+			var file_name = $(this).data('name');
+			$('#deleteModal .modal-body p').html('Are you sure you want to delete ' + file_name + '?');
+			$('#confirmDelete').attr('href', 'captures/delete/' + file_id);
+		});
+
+        $('button.dropdown-toggle').dropdown();
 
 	});
 </script>
