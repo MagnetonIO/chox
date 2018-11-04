@@ -185,9 +185,10 @@ i.fa-tags {
 	width: 100%;
 	margin-bottom: 0;
 	margin-left: -15px;
+}
+.live {
 	top: 300px;
 }
-
 .packets .panel-body {
 	padding: 0;
 	padding-left: 10px;
