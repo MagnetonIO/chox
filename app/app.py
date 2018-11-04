@@ -538,12 +538,9 @@ def stop_capture():
 
     if isRunning == False:
         return json.dumps({'status':200})
-    
+
     try:
         filename = sniffer.stop()
-        sniffer.join()
-        isRunning = False
-
         filetype = splitext(filename)[1].strip('.')
         uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
 
@@ -560,6 +557,10 @@ def stop_capture():
         db.session.add(new_file)
         db.session.commit()
         db.session.refresh(new_file)
+
+        sniffer.join()
+        isRunning = False
+
 
     except Exception as e:
         log('error', 'Exception: %s' % e)

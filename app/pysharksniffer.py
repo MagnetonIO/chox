@@ -32,6 +32,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         return self._stopper.isSet()
 
     def run(self):
+        global isRunning;
         self.start_time = datetime.now()
 
         self.cap = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file=datetime.now().isoformat())
@@ -42,6 +43,8 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         self.output_file = SAVE_FOLDER_PATH + self.filename
         capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file = self.output_file)
         #capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter)
+
+        isRunning = True
 
         for p in capture.sniff_continuously():
             self.perPacket(p)
