@@ -33,7 +33,7 @@ class LiveCapture(Capture):
         if interface is None:
             self.interfaces = get_tshark_interfaces(tshark_path)
         else:
-            self.interfaces = [interface]
+            self.interfaces = interface
 
     def get_parameters(self, packet_count=None):
         """

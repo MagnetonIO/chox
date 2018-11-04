@@ -81,3 +81,13 @@ def get_tshark_interfaces(tshark_path=None):
     tshark_interfaces = subprocess.check_output(parameters).decode("ascii")
     
     return [line.split('.')[0] for line in tshark_interfaces.splitlines()]
+
+def get_tshark_interfaces_list(tshark_path=None):
+    """
+    Returns a list of interface numbers from the output tshark -D. Used
+    internally to capture on multiple interfaces.
+    """
+    parameters = [get_tshark_path(tshark_path), '-D']
+    tshark_interfaces = subprocess.check_output(parameters).decode("ascii")
+
+    return [line.split('.') for line in tshark_interfaces.splitlines()]

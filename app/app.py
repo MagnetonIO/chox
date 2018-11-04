@@ -17,6 +17,7 @@ from flask.ext.migrate import Migrate, MigrateCommand
 from flask_socketio import SocketIO, emit
 from pcap_helper import get_capture_count, decode_capture_file_summary, get_packet_detail
 from pysharksniffer import PysharkSniffer
+from pyshark.tshark.tshark import get_tshark_interfaces, get_tshark_interfaces_list
 import threading
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -32,6 +33,7 @@ app.jinja_env.add_extension("chartkick.ext.charts")
 app.config.from_object("config.DevelopmentConfig")
 ALLOWED_EXTENSIONS = ['pcap','pcapng','cap']
 UPLOAD_FOLDER = os.path.join(basedir, 'static/tracefiles/')
+interfaces = []
 
 def format_comma(value):
     return "{:,.0f}".format(value)
@@ -51,7 +53,7 @@ login_manager.login_view = 'login'
 APlist = []
 CommPairList = []
 lock = threading.Lock()
-sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, socketio, False)
+sniffer = PysharkSniffer(None, lock, APlist, CommPairList, socketio, False)
 
 deviceStatus = {}
 isRunning = False
@@ -60,6 +62,8 @@ isERouterRunning = False
 isIFirewallRunning = False
 isEFirewallRunning = False
 isSwitchRunning = False
+curInterfaces = []
+bpf_filter = ''
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -564,9 +568,29 @@ def stop_capture():
 def run_capture():
     global sniffer
     global isRunning
+    global curInterfaces
+    global bpf_filter
+
+    display_filter = None
+    bpf_filter = None
 
     try:
-        sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, socketio, False)
+        params = json.loads(request.form.to_dict()['data'])
+
+        if params['interface'] == '':
+            curInterfaces = ['any']
+        else:
+            curInterfaces = params['interface']
+
+        if params['filter'] != '':
+            bpf_filter = params['filter']
+
+    except Exception as e:
+        curInterfaces = ['any']
+        bpf_filter = None
+
+    try:
+        sniffer = PysharkSniffer(curInterfaces, lock, bpf_filter, display_filter, socketio, False)
         sniffer.start()
         isRunning = True
     except Exception as e:
@@ -578,7 +602,10 @@ def run_capture():
 @login_required
 def livecapture():
    global isRunning
-   return render_template('livecaptures.html')
+   global curInterfaces
+   global bpf_filter
+
+   return render_template('livecaptures.html', interfaces=interfaces, curInterfaces=curInterfaces, bpf_filter=bpf_filter)
 
 @app.route('/api/v1/<token>/delete/<file_id>')
 def api_delete_file(token, file_id):
@@ -705,5 +732,6 @@ manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', debug=True, threaded=True)
-    sniffer.start()
-    socketio.run(app, host="0.0.0.0")
+    interfaces = get_tshark_interfaces_list()
+    #sniffer.start()
+    socketio.run(app, host="0.0.0.0", debug=True)

@@ -23,7 +23,31 @@
                 </div>
             {% endfor %}
             <br/>
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-md-4">
+                        <label for="interfaces">Select Interfaces</label>
+                        <select multiple class="form-control" id="interface">
+                            {% for interface in interfaces %}
+                                {% if interface[0] in curInterfaces %}
+                                    <option selected value="{{ interface[0] }}">{{ interface[1] }}</option>
+                                {% else %}
+                                    <option value="{{ interface[0] }}">{{ interface[1] }}</option>
+                                {%  endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="filter">Filter String</label>
+                        {% if bpf_filter == None %}
+                            <input type="text" class="form-control" id="filter_str" value=""/>
+                        {% else %}
+                            <input type="text" class="form-control" id="filter_str" value="{{ bpf_filter }}"/>
+                        {%  endif %}
 
+                    </div>
+                </div>
+            </div>
             <div class="row">
 
                 <div class="panel panel-default packets">
@@ -198,10 +222,25 @@
             $('#stop_btn').hide();
             $('#run_btn').show();
 
+            function selectedInterfaceValues(){
+                var result= [];
+
+                $('#interface option:selected').each(function(){
+                    result.push($(this).val());
+                });
+
+                return result;
+            }
             $('#run_btn').click(function(){
+                var interfaces = selectedInterfaceValues();
+                var filter_str = $('#filter_str').val();
+                var jsondata = JSON.stringify({"interface":interfaces, 'filter':filter_str});
+
                 $.ajax({
                     url: '/run_capture',
                     type: 'POST',
+                    data:{'data':jsondata},
+
                     success: function(response){
                         $('#stop_btn').show();
                         $('#run_btn').hide();

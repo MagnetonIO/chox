@@ -9,12 +9,10 @@ from flask_socketio import SocketIO, emit
 
 SAVE_FOLDER_PATH = 'static/tracefiles/'
 class PysharkSniffer(threading.Thread): # This class starts the PyShark master sniffer that updates a list of communicating APs and a list of established communications
-    def __init__(self, interface_string, lock, APlist, CommPairList, socketio, intervals=True, timeout=10, sleep=10):
+    def __init__(self, interface_string, lock, bpf_filter=None, display_filter=None, socketio=None, intervals=True, timeout=10, sleep=10):
         threading.Thread.__init__(self)
         self.interface = interface_string
         self.lock = lock
-        self.APlist = APlist
-        self.CommPairList = CommPairList
         self.cap = None
         self._stopper = threading.Event()
         self.intervals = intervals
@@ -22,6 +20,8 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         self.sleep = sleep
         self.on = False
         self.socketio = socketio
+        self.bpf_filter = bpf_filter
+        self.display_filter = display_filter
         self.output_file = ''
 
     def stop(self):
@@ -34,13 +34,15 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
     def run(self):
         self.start_time = datetime.now()
 
-        self.cap = pyshark.LiveCapture(interface=self.interface, output_file=datetime.now().isoformat())
+        self.cap = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file=datetime.now().isoformat())
 
         self.frame_no = 0
-        #self.cap.set_debug()
+        self.cap.set_debug()
         self.filename = datetime.strftime(datetime.now(), '%Y%m%d%s')  + '.pcap'
         self.output_file = SAVE_FOLDER_PATH + self.filename
-        capture = pyshark.LiveCapture(interface=self.interface, output_file = self.output_file)
+        capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file = self.output_file)
+        #capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter)
+
         for p in capture.sniff_continuously():
             self.perPacket(p)
         # while True:
@@ -122,6 +124,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
     def perPacket(self, packet):
         data = {}
 
+        print(packet)
 
         time = (datetime.now() - self.start_time).total_seconds()
         pkt_length = packet.captured_length
@@ -185,86 +188,11 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
             self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
             #pass
 
-    def getEncryption(self, packet): # takes beacon frame as input. returns the type of encryption used.
-        try:
-            print("Uses " + packet.wlan_mgt.rsn_pcs_list)
-            return "wpa"
-        except Exception as e:
-            print(e)
-            print("Does not use WPA. Defaulting to WEP")
-            return "wep"
-
-    def inAPList(self, packet): # checks to see if a WLAN frame's BSSID is in self.APlist
-        #c = time.clock()
-        try: # this is odd, creates an error sometimes that packet.wlan.bssid is an attribute error
-            localBSSID = packet.wlan.bssid # optimize
-        except Exception as e:
-            print(packet)
-            print(e)
-            sys.exit()
-            # return True # ignore
-        for access_point in self.APlist:
-            if access_point.MAC == localBSSID:
-        #        print time.clock() - c
-                return True
-        #print time.clock() - c
-        return False
-
-    def getIndexinAPList(self, packet): # returns the index number in APList of given AP associated with packet
-        localbssid = packet.wlan.bssid
-        for index, access_point in enumerate(self.APlist):
-            if access_point.MAC == localbssid:
-                return index
-        print("Something wrong if you see this.")
-
-    def append_new_comm_pair(self, packet): # adds new commpair designated by "packet" in commpairlist
-        #print packet.wlan.sa
-        #print packet.wlan.da
-        #print packet.wlan.ta
-        #print packet.wlan.ra
-        #print packet.wlan.bssid
-        localwlan = packet.wlan # optimize
-        index = self.getIndexinAPList(packet)
-        if self.APlist[index].MAC == localwlan.sa:
-            self.stn_MAC = localwlan.da
-        elif self.APlist[index].MAC == localwlan.da:
-            self.stn_MAC = localwlan.sa
-        elif self.APlist[index].MAC == localwlan.ta:
-            self.stn_MAC = localwlan.da
-        elif self.APlist[index].MAC == localwlan.ra:
-            self.stn_MAC = localwlan.sa
-        if self.stn_MAC == "ff:ff:ff:ff:ff:ff": # if it's a broadcast frame
-            return
-        self.CommPairList.append(CommPair.CommunicatingPair(self.APlist[index], self.stn_MAC, packet.sniff_time))
-
-
-    def inCommPairList(self, packet): # checks to see if AP - stn pair involved in frame is already in commpairlist. if already in list, update the parameters of the pair
-        localbssid = packet.wlan.bssid #optimize
-        localda = packet.wlan.da #optimize
-        localsa = packet.wlan.sa #optimize
-        for i, comm_pair in enumerate(self.CommPairList):
-            if comm_pair.AP.MAC == localbssid and (comm_pair.stn_MAC == localda or comm_pair.stn_MAC == localsa):
-
-                self.CommPairList[i].time_last_received = packet.sniff_time
-                print(str(packet.sniff_time))
-                self.lock.acquire()
-                if comm_pair.stn_MAC == localda:
-                    self.CommPairList[i].packet_from_AP_received()
-                else:
-                    self.CommPairList[i].packet_to_AP_received()
-                self.lock.release()
-                #print "Updated a pair in communicating pairs list"
-                #self.CommPairList[i].pretty_print()
-                return True
-        return False
-
 
 if __name__ == "__main__":
     lock = threading.Lock()
-    APlist = []
-    CommPairList = []
     #while True:
-    sniffer = PysharkSniffer("eth0", lock, APlist, CommPairList, False)
+    sniffer = PysharkSniffer("eth0", lock, False)
     print("Main sniffer started")
     sniffer.start()
     #x = raw_input("sdadsa")
