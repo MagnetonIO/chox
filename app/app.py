@@ -536,6 +536,9 @@ def stop_capture():
     global sniffer
     global isRunning
 
+    if isRunning == False:
+        return json.dumps({'status':200})
+    
     try:
         filename = sniffer.stop()
         sniffer.join()
@@ -574,6 +577,8 @@ def run_capture():
     display_filter = None
     bpf_filter = None
 
+    if isRunning:
+        return json.dumps({'status':200})
     try:
         params = json.loads(request.form.to_dict()['data'])
 
