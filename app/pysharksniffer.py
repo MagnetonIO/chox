@@ -171,6 +171,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         data['protocol'] = protocol
         data['length'] = pkt_length
         data['detail'] = detail
+        data['info'] = ''
 
         if self.stopped():
             sys.exit()

@@ -66,7 +66,7 @@
                                     <th data-width="150" data-field="Destination">Destination</th>
                                     <th data-width="100">Protocol</th>
                                     <th data-width="100">Length</th>
-                                    <th data-field="Info">Info</th>
+                                    <!--<th data-field="Info">Info</th>-->
                                 </tr>
                                 </thead>
 
@@ -194,7 +194,7 @@
                 new_record += '<td style="width:150px;">' + packet.dst_ip + '</td>';
                 new_record += '<td style="width:100px;">' + packet.protocol + '</td>';
                 new_record += '<td style="width:100px;">' + packet.length + '</td>';
-                new_record += '<td>' + packet.info + '</td>';
+                //new_record += '<td>' + packet.info + '</td>';
                 new_record += '</tr>';
 
                 if (qPackets.length < qLen){
