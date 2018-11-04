@@ -232,9 +232,14 @@
                 return result;
             }
             $('#run_btn').click(function(){
+                if ($('#run_btn').is(':visible')){
+                    return;
+                }
+
                 var interfaces = selectedInterfaceValues();
                 var filter_str = $('#filter_str').val();
                 var jsondata = JSON.stringify({"interface":interfaces, 'filter':filter_str});
+
 
                 $.ajax({
                     url: '/run_capture',
@@ -252,6 +257,10 @@
             });
 
             $('#stop_btn').click(function(){
+                if ($('#stop_btn').is(':visible')){
+                    return;
+                }
+
                 $.ajax({
                     url: '/stop_capture',
                     type: 'POST',
