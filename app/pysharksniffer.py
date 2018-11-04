@@ -48,19 +48,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
 
         for p in capture.sniff_continuously():
             self.perPacket(p)
-        # while True:
-        #
-        #     try:
-        #         self.on = True
-        #         if self.intervals:
-        #             self.cap.apply_on_packets(self.perPacket, timeout=self.timeout)
-        #         else:
-        #             self.cap.apply_on_packets(self.perPacket)
-        #     except Exception as e:
-        #         print(e)
-        #         print("Timeout")
-        #         self.on = False
-        #     time.sleep(self.sleep)
+
     def getDetail(self, packet):
         detail = ''
 

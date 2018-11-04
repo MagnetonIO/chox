@@ -56,7 +56,7 @@
 
 
                         <div class="packetList">
-                            <table class="table table-condensed table-hover" data-toolbar="#custom-toolbar" data-toggle="table" data-show-columns="true">
+                            <table id="livetable" class="table table-condensed table-hover" data-toolbar="#custom-toolbar" data-toggle="table" data-show-columns="true">
                                 <thead>
                                 <tr>
                                     <th data-width="100">#</th>
@@ -178,11 +178,11 @@
                 var new_record = '';
 
                 if (packet.protocol == 'HTTP') {
-                    new_record = '<tr class="success">';
+                    new_record = '<tr id="' + packet.no + '" class="success">';
                 }else if (packet.protocol == 'TCP') {
-                    new_record = '<tr class="info">';
+                    new_record = '<tr id="' + packet.no + '" class="info">';
                 }else if (packet.protocol == 'UDP'){
-                    new_record = '<tr class="warning">';
+                    new_record = '<tr id="' + packet.no + '" class="warning">';
                 }else{
                     new_record = "<tr>";
                 }
@@ -203,7 +203,7 @@
                     $('#packet_container tr:first-child').remove();
                     qPackets.shift();
                 }
-                qPackets.push(packet.no);
+                qPackets.push({'no':packet.no, 'detail':packet.detail});
 
                 $('#packet_container').append(new_record);
                 $('#stop_btn').show();
@@ -272,6 +272,28 @@
                         console.log(error);
                     }
                 });
+            });
+
+            $('#livetable').on('click', 'tbody tr', function(event){
+                var sel_tr_id = $(this).attr('id');
+                var packetPane = $('.packetPane');
+                packetPane.html('');
+                $('.spinner').removeClass('hide');
+
+                for (var index = 0; index < qPackets.length; index++){
+                    if (sel_tr_id == qPackets[index]['no']){
+                        $('.spinner').addClass('hide');
+                        packetPane.html(qPackets[index]['detail']);
+
+                        $('a.packetHeader').on('click', function(e){
+                            // e.preventDefault();
+                            var panel = $(this).data('target');
+                            $(panel).toggleClass('collapse');
+                            $(this).children('i').toggleClass('fa-rotate-90');
+
+                        });
+                    }
+                }
             });
 
             window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
