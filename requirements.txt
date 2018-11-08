@@ -50,3 +50,6 @@ six==1.4.1
 trollius==1.0.2
 validators==0.7
 #wsgiref
+scapy
+pypcapfile
+flask_socketio

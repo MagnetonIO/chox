@@ -6,48 +6,74 @@ import time
 from datetime import datetime
 from random import random
 from flask_socketio import SocketIO, emit
+from models import Template
 
 SAVE_FOLDER_PATH = 'static/tracefiles/'
 class PysharkSniffer(threading.Thread): # This class starts the PyShark master sniffer that updates a list of communicating APs and a list of established communications
-    def __init__(self, interface_string, lock, bpf_filter=None, display_filter=None, socketio=None, intervals=True, timeout=10, sleep=10):
+    #def __init__(self, db, interface_string, lock, bpf_filter=None, display_filter=None, socketio=None, intervals=True, timeout=10, sleep=10):
+    def __init__(self, db, temp_id, socketio):
         threading.Thread.__init__(self)
-        self.interface = interface_string
-        self.lock = lock
-        self.cap = None
+        # self.interface = interface_string
+        # self.lock = lock
+        # self.cap = None
         self._stopper = threading.Event()
-        self.intervals = intervals
-        self.timeout = timeout
-        self.sleep = sleep
+        # self.intervals = intervals
+        # self.timeout = timeout
+        # self.sleep = sleep
         self.on = False
         self.socketio = socketio
-        self.bpf_filter = bpf_filter
-        self.display_filter = display_filter
-        self.output_file = ''
+        # self.bpf_filter = bpf_filter
+        # self.display_filter = display_filter
+        # self.output_file = ''
+        self.db = db
+        self.temp_id = temp_id
+        self.template = None
 
     def stop(self):
         self._stopper.set()
-        return self.filename
+        self.template = None
+        return [self.filename, self.temp_id]
 
     def stopped(self):
         return self._stopper.isSet()
 
+    def getTemplate(self):
+        return self.template
+
     def run(self):
-        global isRunning;
         self.start_time = datetime.now()
 
-        self.cap = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file=datetime.now().isoformat())
+        #self.cap = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file=datetime.now().isoformat())
 
         self.frame_no = 0
-        self.cap.set_debug()
+        #self.cap.set_debug()
         self.filename = datetime.strftime(datetime.now(), '%Y%m%d%s')  + '.pcap'
         self.output_file = SAVE_FOLDER_PATH + self.filename
-        capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file = self.output_file)
+
+        self.template = Template.query.filter_by(id=self.temp_id).one()
+
+        #capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file = self.output_file)
+        capture = pyshark.LiveCapture(extra_params_str=self.template.command)
+        capture.set_debug()
         #capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter)
 
-        isRunning = True
+        isFirst = True
+        for p, pid in capture.sniff_continuously():
+            if isFirst:
+                try:
 
-        for p in capture.sniff_continuously():
-            self.perPacket(p)
+                    self.template.process_id = pid
+                    self.db.session.commit()
+                except Exception as e:
+                    print(e)
+
+            self.perPacket(p, pid)
+            isFirst = False
+
+        print('stopped')
+        self.template = None
+        self.socketio.emit('errordata', {'data': {'temp_id':self.temp_id, "message":[{'type':'warning', 'message':'Incorrect tshark parameters.'}]}}, namespace='/stopcapture')
+        sys.exit()
 
     def getDetail(self, packet):
         detail = ''
@@ -112,7 +138,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
             elif layer._layer_name == 'ipv6':
                 return 6
 
-    def perPacket(self, packet):
+    def perPacket(self, packet, pid):
         data = {}
 
         print(packet)
@@ -172,14 +198,17 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         data['length'] = pkt_length
         data['detail'] = detail
         data['info'] = ''
+        data['pid'] = pid
+        data['temp_id'] = self.temp_id
 
         if self.stopped():
             sys.exit()
             print('stopped')
+            self.template = None
         else:
-            self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
-            #pass
 
+            self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
+            pass
 
 if __name__ == "__main__":
     lock = threading.Lock()

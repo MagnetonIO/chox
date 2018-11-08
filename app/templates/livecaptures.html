@@ -12,8 +12,8 @@
 
 
     <div class="container-fluid content">
-        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="stop_btn" class="shark_btn"></img>
-        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="run_btn" class="shark_btn"></img>
+{#        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="stop_btn" class="shark_btn"></img>#}
+{#        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="run_btn" class="shark_btn"></img>#}
 
         <div class="col-md-12">
             {% for category, message in get_flashed_messages(with_categories=true) %}
@@ -23,31 +23,31 @@
                 </div>
             {% endfor %}
             <br/>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-4">
-                        <label for="interfaces">Select Interfaces</label>
-                        <select multiple class="form-control" id="interface">
-                            {% for interface in interfaces %}
-                                {% if interface[0] in curInterfaces %}
-                                    <option selected value="{{ interface[0] }}">{{ interface[1] }}</option>
-                                {% else %}
-                                    <option value="{{ interface[0] }}">{{ interface[1] }}</option>
-                                {%  endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="filter">Filter String</label>
-                        {% if bpf_filter == None %}
-                            <input type="text" class="form-control" id="filter_str" value=""/>
-                        {% else %}
-                            <input type="text" class="form-control" id="filter_str" value="{{ bpf_filter }}"/>
-                        {%  endif %}
-
-                    </div>
-                </div>
-            </div>
+{#            <div class="row">#}
+{#                <div class="form-group">#}
+{#                    <div class="col-md-4">#}
+{#                        <label for="interfaces">Select Interfaces</label>#}
+{#                        <select multiple class="form-control" id="interface">#}
+{#                            {% for interface in interfaces %}#}
+{#                                {% if interface[0] in curInterfaces %}#}
+{#                                    <option selected value="{{ interface[0] }}">{{ interface[1] }}</option>#}
+{#                                {% else %}#}
+{#                                    <option value="{{ interface[0] }}">{{ interface[1] }}</option>#}
+{#                                {%  endif %}#}
+{#                            {% endfor %}#}
+{#                        </select>#}
+{#                    </div>#}
+{#                    <div class="col-md-4">#}
+{#                        <label for="filter">Filter String</label>#}
+{#                        {% if bpf_filter == None %}#}
+{#                            <input type="text" class="form-control" id="filter_str" value=""/>#}
+{#                        {% else %}#}
+{#                            <input type="text" class="form-control" id="filter_str" value="{{ bpf_filter }}"/>#}
+{#                        {%  endif %}#}
+{##}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
             <div class="row">
 
                 <div class="panel panel-default packets live">
@@ -107,7 +107,7 @@
             var qPackets = [];
             var qLen = 50;
 
-            $('a#packetStats').on('click', function(e){
+            $('#packetStats').on('click', function(e){
                 e.preventDefault();
                 $('div.packetStats').toggleClass('hide');
             });
@@ -157,7 +157,7 @@
                 window.location.href= window.location.pathname.split('?')[0];
             });
 
-            $('button.dropdown-toggle').dropdown();
+            //$('button.dropdown-toggle').dropdown();
             $(".bootstrap-tagsinput input").typeahead({ source:tag_list, confirmKeys: [13, 44] });
 
             $('.fixed-table-container').css('height', $('.top_panel').height()-60);
@@ -168,8 +168,8 @@
 
             var socket = io.connect("http://" + document.domain +':' + location.port + '/livecapture');
             var received_data = [];
-            $('#stop_btn').hide();
-            $('#run_btn').show();
+            //$('#stop_btn').hide();
+            //$('#run_btn').show();
 
             socket.on("newdata", function(msg){
                 var packet = msg.data;
@@ -206,8 +206,8 @@
                 qPackets.push({'no':packet.no, 'detail':packet.detail});
 
                 $('#packet_container').append(new_record);
-                $('#stop_btn').show();
-                $('#run_btn').hide();
+                //$('#stop_btn').show();
+                //$('#run_btn').hide();
 
                 var scrollBottom = $('.fixed-table-body').height();
                 $('.fixed-table-body').scrollTop(10000);
@@ -215,8 +215,8 @@
 
             socket.on('error', function(err){
                 console.log(err);
-                $('#stop_btn').hide();
-                $('#run_btn').show();
+                //$('#stop_btn').hide();
+                //$('#run_btn').show();
             });
 
             $('#stop_btn').hide();
@@ -296,7 +296,7 @@
                 }
             });
 
-            window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
+            //window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
             $('.packets').css('width', 'calc(100vw - 50px) - $(".cd-side-nav").width()');
             $('#custom-toolbar').css('width', 'calc(100vw - 50px) - $(".cd-side-nav").width()');
             $('.fixed-table-container').css('width', 'calc(100vw - 50px) - $(".cd-side-nav").width()');

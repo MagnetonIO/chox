@@ -187,7 +187,7 @@ i.fa-tags {
 	margin-left: -15px;
 }
 .live {
-	top: 300px;
+	top: 120px;
 }
 .packets .panel-body {
 	padding: 0;
@@ -201,11 +201,6 @@ i.fa-tags {
 .packetPane .panel, .packetPane .panel-body p {
 	margin: 0 2px;
 	padding: 0 2px;
-}
-#new {
-	position: absolute;
-    top: 100px;
-    left: 250px;
 }
 .shark_btn {
 	width:20px;
@@ -230,4 +225,23 @@ i.fa-tags {
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+#templates_container .template {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+#templates_container .template	li {
+	list-style-type: none;
+}
+#templates_container .run {
+		position:absolute;
+		top:-30px;
+		right:40px;
+}
+#templates_container	.stop {
+	display:none;
+	position:absolute;
+	top:-30px;
+	right:20px;
 }

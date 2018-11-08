@@ -443,6 +443,19 @@ Sidebar
   display: none;
 }
 @media only screen and (min-width: 300px) {
+  .new-btn {
+    position: absolute;
+    top: 80px;
+    left: 115px;
+  }
+  #new {
+	width:300px;
+	z-index:999;
+	position: absolute;
+    top: 80px;
+    left: 175px;
+  }
+
   .cd-side-nav {
     position: relative;
     float: left;
@@ -526,6 +539,19 @@ Sidebar
   }
 }
 @media only screen and (min-width: 1170px) {
+  .new-btn {
+    position: absolute;
+    top: 80px;
+    left: 195px;
+  }
+  #new {
+	width:300px;
+	z-index:999;
+	position: absolute;
+    top: 80px;
+    left: 253px;
+  }
+
   .cd-side-nav {
     width: 200px;
   }

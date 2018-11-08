@@ -174,7 +174,7 @@ class Capture(object):
                     break
                 if packet:
                     packets_captured += 1
-                    yield packet
+                    yield packet, tshark_process.pid
                 if packet_count and packets_captured >= packet_count:
                     break
         finally:

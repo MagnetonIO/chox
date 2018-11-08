@@ -154,7 +154,7 @@ Chox
 									<td>TShark</td>
 									<td>
                                             <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="stop_btn" class="shark_btn"></img>
-                                            <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="run_btn" class="shark_btn"></img>
+                                            <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="run_btn" class="shark_btn" onclick="run(1)"></img>
 
                                     </td>
 								</tr>
@@ -193,50 +193,7 @@ Chox
 {{ super() }}
 
 <script type="text/javascript">
-
 	$(document).ready(function(){
-        var socket = io.connect("http://" + document.domain +':' + location.port + '/livecapture');
-        $('#stop_btn').hide();
-        $('#run_btn').show();
-
-        $('#run_btn').click(function(){
-            $.ajax({
-                url: '/run_capture',
-                type: 'POST',
-                success: function(response){
-                    $('#stop_btn').show();
-                    $('#run_btn').hide();
-                },
-                error: function(error){
-                    console.log(error);
-                }
-            });
-        });
-
-        $('#stop_btn').click(function(){
-            $.ajax({
-                url: '/stop_capture',
-                type: 'POST',
-                success: function(response){
-                    $('#stop_btn').hide();
-                    $('#run_btn').show();
-                },
-                error: function(error){
-                    console.log(error);
-                }
-            });
-        });
-
-        socket.on("newdata", function(msg){
-            $('#stop_btn').show();
-            $('#run_btn').hide();
-
-        });
-
-        socket.on('error', function(err){
-            $('#stop_btn').hide();
-            $('#run_btn').show();
-        })
 
         $('.deleteButton').on('click', function(){
 			var file_id = $(this).data('id');
@@ -245,7 +202,7 @@ Chox
 			$('#confirmDelete').attr('href', 'captures/delete/' + file_id);
 		});
 
-        $('button.dropdown-toggle').dropdown();
+        //$('button.dropdown-toggle').dropdown();
 
 	});
 </script>

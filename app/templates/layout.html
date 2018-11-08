@@ -1,130 +1,301 @@
 {% extends "bootstrap/base.html" %}
 
 {% block head %}
-{{super()}}
+    {{super()}}
 
-<title>{% block title %}{% endblock %} - Sub Reach</title> 
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<!-- <script src="{{ url_for('static', filename='jquery.min.js') }}"></script> -->
-<!-- <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script> -->
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/highcharts/4.0.4/highcharts.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-<!-- <script src="{{ url_for('static', filename='highcharts.js') }}"></script> -->
-<script src="{{ url_for('static', filename='chartkick.js') }}"></script>
-<script src="{{ url_for('static', filename='bootstrap-table.min.js') }}"></script>
-<script src="{{ url_for('static', filename='modernizr.js') }}"></script>
-<!--<script src="static/js/app.js"></script>-->
+    <title>{% block title %}{% endblock %} - Sub Reach</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- <script src="{{ url_for('static', filename='jquery.min.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script> -->
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highcharts/4.0.4/highcharts.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <!-- <script src="{{ url_for('static', filename='highcharts.js') }}"></script> -->
+    <script src="{{ url_for('static', filename='chartkick.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap-table.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='modernizr.js') }}"></script>
+    <!--<script src="static/js/app.js"></script>-->
 {% endblock %}
 
 
 
 {% block styles %}
-{{ super() }}
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-table.min.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-tagsinput.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropzone.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='sidebar.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery.splitter.css') }}">
-<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    {{ super() }}
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-table.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-tagsinput.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropzone.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='sidebar.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery.splitter.css') }}">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 {% endblock %}
-    
+
 {% block content %}
     {% if current_user.is_authenticated() %}
-	<div class="navbar navbar-default navbar-fixed-top" role="navigation"> 
-		<div class="container-fluid">
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container-fluid">
 
                 <div class="navbar-header">
                     <a class="navbar-brand" href="/"><img class="brand-img" src="{{ url_for('static', filename="/images/Chox-Chocks.png") }}" /></a>
                 </div>
 
 
-	    	<div class="navbar-collapse collapse"> 
-	    	<ul class="nav navbar-nav"></ul>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav"></ul>
 
-	    	<ul class="nav navbar-nav navbar-right">
-		    	{% if current_user.is_authenticated() %}
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if current_user.is_authenticated() %}
 
-			    	<!-- <li><a href="{{ url_for('help') }}"><img width=20 height=20 src="{{ url_for('static', filename='help.png') }}"></a></li> -->
-			    	<li class="dropdown">
-	    	          <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ current_user.username }} <span class="caret"></span></a>
-	    	          <ul class="dropdown-menu" role="menu">
-	    	            <li><a href="{{ url_for('profile') }}"><i class="fa fa-cogs"></i> Profile Settings</a></li>
-	    	            {% if current_user.role == 'admin' %}
-		    	            <li><a href="{{ url_for('users') }}"><i class="fa fa-users"></i> Edit Users</a></li>
-		    	            <li><a href="{{ url_for('logs') }}"><i class="fa fa-list-alt"></i> View Logs</a></li>
-		    	        {% endif %}
-	    	            <li class="divider"></li>
-	    	            <li><a href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i> Sign Out</a></li>
-	    	          </ul>
-	    	        </li>
-		    	{% else %}
-			    	<!--<li><a href="{{ url_for('login') }}">Sign In</a></li>-->
-		    	{% endif %}
-	    	</ul>
-	        </div>
-	    </div>
-	</div>
-    {% endif %}
-	<div class="wrapper-container">
-        {% if current_user.is_authenticated() %}
-            <!--<button data-toggle="collapse" data-target="#new">New</button>
-
-            <div id="new" class="collapse">
-                <div class="row">
-                    <div class="col-md-4">1</div>
-                    <div class="col-md-4">2</div>
-                    <div class="col-md-4">3</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4">4</div>
-                    <div class="col-md-4">5</div>
-                    <div class="col-md-4">6</div>
-                </div>
-            </div> -->
-            <main class="cd-main-content">
-                <nav class="cd-side-nav">
-                    <ul>
-                        <li class="has-children dashboard main-menu">
-                            <a href="/"><i class="fa-li fas fa-tachometer-alt"></i>Dashboard</a>
-                            <ul class="sub-menu">
-                                <li><a href="/livecapture"><i class="fa-li fas fa-stream"></i>Live Capture</a></li>
-                                <li><a href="/pcap"><i class="fa-li fas fa-chart-pie"></i>PCAP File</a></li>
-                            </ul>
-                        </li>
-                        <li class="archive main-menu">
-                            <a href="#0"><i class="fa-li fas fa-sitemap"></i>Archive</a>
-                        </li>
-
-                        <li class="has-children settings main-menu">
-                            <a href="#0"><i class="fa-li fa fa-cog"></i>Settings</a>
-                            <ul class="sub-menu">
-                                <li><a href="/users"><i class="fa-li fa fa-users"></i>Manage Users</a></li>
-                                <li><a href="#0"><i class="fa-li fas fa-suitcase-rolling"></i>Manage Roles</a></li>
-                            </ul>
-                        </li>
+                            <!-- <li><a href="{{ url_for('help') }}"><img width=20 height=20 src="{{ url_for('static', filename='help.png') }}"></a></li> -->
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ current_user.username }} <span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="{{ url_for('profile') }}"><i class="fa fa-cogs"></i> Profile Settings</a></li>
+                                    {% if current_user.role == 'admin' %}
+                                        <li><a href="{{ url_for('users') }}"><i class="fa fa-users"></i> Edit Users</a></li>
+                                        <li><a href="{{ url_for('logs') }}"><i class="fa fa-list-alt"></i> View Logs</a></li>
+                                    {% endif %}
+                                    <li class="divider"></li>
+                                    <li><a href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i> Sign Out</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <!--<li><a href="{{ url_for('login') }}">Sign In</a></li>-->
+                        {% endif %}
                     </ul>
-                </nav>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="wrapper-container">
+    {% if current_user.is_authenticated() %}
+        <button data-toggle="collapse" class="new-btn btn btn-primary" data-target="#new">New</button>
 
-                <div id="wrapper">
+        <div id="new" class="collapse panel panel-primary">
+            <div class="panel-heading">Templates</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div id="flash"></div>
 
-        {% endif %}
-	
-    
+                    <div class="col-md-12">
+                        <ul class="nav nav-stacked" id="templates_container">
+                            <li class="panel template">
+                                <a data-toggle="collapse" data-parent="#templates_container" href="#new_template">New</a>
+                                <ul id="new_template" class="collapse template">
+                                    <li>
+                                        <div class="form-group">
+                                            <div class="form-group">
+                                                <input type="text" id="name_new" class="form-control command" placeholder="Enter a template name." />
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" id="command_new" class="form-control command" placeholder="Enter a command."/>
+                                            </div>
+                                            <div class="form-group">
+                                                <button class="btn btn-default" type="button" onclick="save_template()" >Save</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            {% for template in templates %}
+                                <li class="panel" style="margin-bottom:0px;">
+                                    <a data-toggle="collapse" data-parent="#templates_container" href="#{{ template['id'] }}">{{ template['name'] }}</a>
+                                    <input type="hidden" class="temp_id" value="{{ template['id'] }}" />
+                                    <div class="status_container" id="status_{{ template['id'] }}" style="position:relative">
+                                        <img src="/static/images/green_btn.png" id="" class="shark_btn run" onclick="run({{ template['id'] }})" />
+                                        <img src="/static/images/red_btn.png" id="" class="shark_btn stop" onclick="stop({{ template['id'] }})"  />
+                                    </div>
+
+                                    <ul id="{{ template['id'] }}" class="collapse template">
+                                        <li>
+                                            <div class="form-group">
+                                                <input type="text" id="name_{{ template['id'] }}" class="form-control command" value="{{ template['name'] }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" id="command_{{ template['id'] }}" class="form-control command" value="{{ template['command'] }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <button class="btn btn-default" type="button" onclick="save_template({{ template['id'] }})" >Save</button>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <main class="cd-main-content">
+        <nav class="cd-side-nav">
+            <ul>
+                <li class="has-children dashboard main-menu">
+                    <a href="/"><i class="fa-li fas fa-tachometer-alt"></i>Dashboard</a>
+                    <ul class="sub-menu">
+                        <li><a href="/livecapture"><i class="fa-li fas fa-stream"></i>Live Capture</a></li>
+                        <li><a href="/pcap"><i class="fa-li fas fa-chart-pie"></i>PCAP File</a></li>
+                    </ul>
+                </li>
+                <li class="archive main-menu">
+                    <a href="#0"><i class="fa-li fas fa-sitemap"></i>Archive</a>
+                </li>
+
+                <li class="has-children settings main-menu">
+                    <a href="#0"><i class="fa-li fa fa-cog"></i>Settings</a>
+                    <ul class="sub-menu">
+                        <li><a href="/users"><i class="fa-li fa fa-users"></i>Manage Users</a></li>
+                        <li><a href="#0"><i class="fa-li fas fa-suitcase-rolling"></i>Manage Roles</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <div id="wrapper">
+
+    {% endif %}
+
+
 {% endblock %}
 
 {% block scripts %}
-{{ super() }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
     <script src="{{ url_for('static', filename='jquery.menu-aim.js') }}"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
-<script type="text/javascript">
-	$('a.dropdown-toggle').dropdown();
+    <script type="text/javascript">
+        var flashMessage = function(data){
+            html = '';
+            for (i=0; i<data.length; i++) {
+                html += '<div class="alert alert-' + data[i]['type'] + '"><a href="#" class="close" data-dismiss="alert">&times;</a>' + data[i].message + '</div>';
+            }
+            return html;
+        };
+        function run(temp_id) {
+            var jsondata = JSON.stringify({"temp_id":temp_id});
 
-</script>
+            $.ajax({
+                url: '/run_capture',
+                type: 'POST',
+                data:{'data':jsondata},
+                success: function(response){
+                    $('#flash').html(flashMessage(JSON.parse(response).message));
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        }
+
+        function stop(temp_id) {
+            var jsondata = JSON.stringify({"temp_id":temp_id});
+
+            $.ajax({
+                url: '/stop_capture',
+                type: 'POST',
+                data:{'data':jsondata},
+                success: function(response){
+                    var temp_id = JSON.parse(response).temp_id;
+                    var status_container = $('#status_' + temp_id);
+                    $(status_container).find('.run').show();
+                    $(status_container).find('.stop').hide();
+
+                    $('#flash').html(flashMessage(JSON.parse(response).message));
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        }
+
+        function save_template(temp_id) {
+            var name;
+            var jsondata;
+
+            if (isNaN(temp_id)){
+                temp_id = '';
+                name = $('#name_new').val();
+                command = $('#command_new').val();
+            }else {
+                name = $('#name_' + temp_id).val();
+                command = $('#command_' + temp_id).val();
+            }
+
+            jsondata = JSON.stringify({"temp_id": temp_id, "name": name, "command": command});
+
+            $.ajax({
+                url: '/save_template',
+                type: 'POST',
+                data: {'data': jsondata},
+                success: function (response) {
+                    var data = JSON.parse(response).new;
+                    if (data !=''){
+                        $('#templates_container').append(data);
+                        $('#name_new').val('');
+                        $('#command_new').val('');
+                    }
+                    $('#flash').html(flashMessage(JSON.parse(response).message));
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+        $(document).ready(function(){
+            var socket = io.connect("http://" + document.domain +':' + location.port + '/livecapture');
+            var stopsocket = io.connect("http://" + document.domain +':' + location.port + '/stopcapture');
+            $('#stop_btn').hide();
+            $('#run_btn').show();
+
+            socket.on("newdata", function(msg){
+                var packet = msg.data;
+                var temp_process_id_id = packet['temp_id'];
+                var eProcess_id = $(this).find('.process').val();
+
+                $('#templates_container .status_container').each(function(index){
+
+                    var temp_id = $(this).parent().find('.temp_id').val();
+
+                    if ( temp_process_id_id == temp_id ){
+                        $(this).find('.run').hide();
+                        $(this).find('.stop').show();
+                    } else {
+                        $(this).find('.run').show();
+                        $(this).find('.stop').hide();
+                    }
+
+                });
+            });
+
+            stopsocket.on("errordata", function(msg){
+                var packet = msg.data;
+                var temp_process_id_id = packet['temp_id'];
+                var eProcess_id = $(this).find('.process').val();
+
+                $('#templates_container .status_container').each(function(index){
+
+                    var temp_id = $(this).parent().find('.temp_id').val();
+
+                    if ( temp_process_id_id == temp_id ){
+                        $(this).find('.run').show();
+                        $(this).find('.stop').hide();
+
+                        $('#flash').html(flashMessage(packet['message']));
+                    }
+
+                });
+            });
+
+            socket.on('error', function(err){
+                $('#stop_btn').hide();
+                $('#run_btn').show();
+            });
+
+            });
+    </script>
 
 {% endblock %}

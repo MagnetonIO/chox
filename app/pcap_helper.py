@@ -89,7 +89,7 @@ def get_packet_detail(traceFile, number):
 	old_stdout = sys.stdout
 	sys.stdout = mystdout = StringIO()
 
-	cap[number-1].pretty_print()
+	cap[number-1][0].pretty_print()
 
 	sys.stdout = old_stdout
 

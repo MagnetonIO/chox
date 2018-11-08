@@ -1,7 +1,7 @@
 import os, datetime, time, random, json, uuid, chartkick, base64, hashlib
 from os.path import splitext
 from flask import redirect, render_template, url_for, flash, request, Flask, send_file, jsonify
-from flask.ext.sqlalchemy import SQLAlchemy
+
 from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from sqlalchemy.orm.exc import NoResultFound
@@ -9,7 +9,7 @@ from flask.ext.script import Manager, Shell
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.login import LoginManager, login_required, login_user, UserMixin, logout_user, current_user
 from werkzeug import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
+
 import config
 from sanicap import sanitize
 from forms import LoginForm, EditTags, ProfileForm, AddUser, EditUser, TempPasswordForm, SanitizeForm
@@ -19,11 +19,15 @@ from pcap_helper import get_capture_count, decode_capture_file_summary, get_pack
 from pysharksniffer import PysharkSniffer
 from pyshark.tshark.tshark import get_tshark_interfaces, get_tshark_interfaces_list
 import threading
+from database import db
+from models import User, TraceFile, Log, Tag, Template
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 ## app setup
 app = Flask(__name__)
+db.app = app
+db.init_app(app)
 manager = Manager(app)
 socketio = SocketIO(app)
 bootstrap = Bootstrap(app)
@@ -33,28 +37,18 @@ app.jinja_env.add_extension("chartkick.ext.charts")
 app.config.from_object("config.DevelopmentConfig")
 ALLOWED_EXTENSIONS = ['pcap','pcapng','cap']
 UPLOAD_FOLDER = os.path.join(basedir, 'static/tracefiles/')
-interfaces = []
 
 def format_comma(value):
     return "{:,.0f}".format(value)
 app.jinja_env.filters['format_comma'] = format_comma
-
-## db setup
-db = SQLAlchemy(app, session_options = {
-    'expire_on_commit': False
-    })
-
 
 migrate = Migrate(app, db)
 ## Login Manager
 login_manager = LoginManager(app)
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'login'
-APlist = []
-CommPairList = []
-lock = threading.Lock()
-sniffer = PysharkSniffer(None, lock, APlist, CommPairList, socketio, False)
 
+sniffer = None
 deviceStatus = {}
 isRunning = False
 isIRouterRunning = False
@@ -62,74 +56,13 @@ isERouterRunning = False
 isIFirewallRunning = False
 isEFirewallRunning = False
 isSwitchRunning = False
-curInterfaces = []
-bpf_filter = ''
+templates = []
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(64), unique=True, index=True)
-    username = db.Column(db.String(64), unique=True, index=True)
-    password_hash = db.Column(db.String(128))
-    token = db.Column(db.String(64))
-    role = db.Column(db.String(64)) # admin, user
-    temp_password = db.Column(db.Boolean())
-    
-    @property
-    def password(self):
-        raise AttributeError('password is not a readable attribute')
-    
-    @password.setter
-    def password(self, password):
-        self.password_hash = generate_password_hash(password)
-    
-    def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-    def __repr__(self):
-        return '<User %r>\n' % self.username
-
-class TraceFile(db.Model):
-    __tablename__ = 'tracefiles'
-
-    id = db.Column(db.String(8), primary_key=True)
-    name = db.Column(db.String(128), index=True)
-    description = db.Column(db.Text())
-    filename = db.Column(db.String(128))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    username = db.relationship('User')
-    filesize = db.Column(db.Integer) #Bytes
-    filetype = db.Column(db.String(64))
-    packet_count = db.Column(db.Integer)
-    date_added = db.Column(db.DateTime)
-
-    def __repr__(self):
-        return '<TraceFile %r, filename: %r>\n' % (self.name, self.filename)
-
-class Tag(db.Model):
-    __tablename__ = 'tags'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
-    file_id = db.Column(db.String(8), db.ForeignKey('tracefiles.id'))
-
-    def __repr__(self):
-        return '<Tag %r, file_id: %s>\n' % (self.name, self.file_id)
-
-class Log(db.Model):
-    __tablename__ = 'logs'
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime)
-    level = db.Column(db.String) #info, warning, error
-    description = db.Column(db.String)
-
-    def __repr__(self):
-        return '<Log: %s - %s - %s>\n' % (self.timestamp, self.level, self.description)
 
 def get_uuid():
     #return base64.b64encode(hashlib.sha256( str(random.getrandbits(256)) ).digest(), random.choice(['rA','aZ','gQ','hH','hG','aR','DD'])).rstrip('==')
@@ -163,7 +96,7 @@ def login():
         else:
             flash('Invalid username or password.', 'danger')
             return redirect(request.args.get('next') or url_for('login'))
-        
+
         if user.temp_password:
             return redirect(url_for('home'))
         else:
@@ -231,7 +164,9 @@ def home():
 
         tags = set([x.name for x in Tag.query.all()])
 
-        return render_template('home.html', form=form, data=deviceStatus, traceFiles=traceFiles, tags=tags)
+
+
+        return render_template('home.html', form=form, data=deviceStatus, traceFiles=traceFiles, tags=tags, templates=templates)
 
 @app.route('/pcap')
 @login_required
@@ -529,6 +464,55 @@ def upload_file():
 def livecapture_connect():
    print('---connected---')
 
+@app.route('/save_template', methods=['POST'])
+@login_required
+def save_tempalte():
+    global tempaltes
+    try:
+        params = json.loads(request.form.to_dict()['data'])
+        temp_id = params['temp_id']
+        name = params['name']
+        command = params['command']
+        if temp_id == "": #new template
+            new_template = Template(name=name, command=command, process_id="", status=0)
+            db.session.add(new_template)
+            db.session.flush()
+            db.session.refresh(new_template)
+            id = str(new_template.id)
+
+            data = '<li class="panel template">'
+            data += '    <a data-toggle="collapse" data-parent="#templates_container" href="#' +  id + '">' + new_template.name + '</a>'
+            data += '    <input type="hidden" class="temp_id" value="' + id + '">'
+            data += '    <div class="status_container" id="status_' + id + '" style="position:relative">'
+            data += '        <img src="/static/images/green_btn.png" id="" class="shark_btn run" onclick="run(' + id + ')" >'
+            data += '        <img src="/static/images/red_btn.png" id="" class="shark_btn stop" onclick="stop(' + id + ')" >'
+            data += '    </div>'
+            data += '    <ul id="' + id + '" class="collapse template">'
+            data += '        <li><div class="form-group">'
+            data += '            <div class="form-group">'
+            data += '                <input type="text" id="name_' + id + '" class="form-control command" value="' + new_template.name + '">'
+            data += '            </div>'
+            data += '            <div class="form-group">'
+            data += '                <input type="text" id="command_' + id + '" class="form-control command" value="' + new_template.command + '">'
+            data += '            </div>'
+            data += '            <div class="form-group">'
+            data += '                <button class="btn btn-default" type="button" onclick="save_template(' + id + ')">Save</button>'
+            data += '            </div>'
+            data += '        </div></li>'
+            data += '    </ul>'
+            data += '</li>'
+
+            templates = Template.query.all()
+            return json.dumps({"status":200,"message":[{'type':"success", "message":"New template was added."}], "new":data})
+        else:
+            template = Template.query.filter_by(id=temp_id).one()
+            template.name = name
+            template.command = command
+            db.session.commit()
+
+            return json.dumps({"status":200,"message":[{'type':"success", "message":"Template was saved."}], "new":''})
+    except Exception as e:
+        return json.dumps({"status":500,"message":[{'type':"danger", "message":"Error occured"}]})
 
 @app.route('/stop_capture', methods=['POST'])
 @login_required
@@ -536,73 +520,89 @@ def stop_capture():
     global sniffer
     global isRunning
 
-    if isRunning == False:
-        return json.dumps({'status':200})
+    try:
+        params = json.loads(request.form.to_dict()['data'])
+        temp_id = params['temp_id']
+
+        if temp_id is None or temp_id == '':
+            return json.dumps({"status":406,"message":[{'type':"warning", "message":"Templte ID was not specified."}]})
+
+        template = sniffer.getTemplate()
+
+        if template is None:
+            return json.dumps({"status":406,"message":[{'type':"warning", "message":template.name + " isn't started yet."}]})
+
+        if temp_id != template.id:
+            return json.dumps({"status":406,"message":[{'type':"warning", "message":template.name + " isn't started yet."}]})
+
+    except Exception as e:
+        return json.dumps({"status":406,"message":[{'type':"warning", "message":e}]})
 
     try:
-        filename = sniffer.stop()
-        filetype = splitext(filename)[1].strip('.')
-        uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
+        [filename, temp_id] = sniffer.stop()
 
-        new_file = TraceFile(id=str(uuid.uuid4())[:8],
-            name=secure_filename(splitext(filename)[0]),
-            user_id = current_user.id,
-            filename = filename,
-            filetype = filetype,
-            filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename)),
-            packet_count = get_capture_count(filename),
-            date_added = datetime.datetime.now()
-            )
-
-        db.session.add(new_file)
-        db.session.commit()
-        db.session.refresh(new_file)
+        # filetype = splitext(filename)[1].strip('.')
+        # uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
+        #
+        # new_file = TraceFile(id=str(uuid.uuid4())[:8],
+        #     name=secure_filename(splitext(filename)[0]),
+        #     user_id = current_user.id,
+        #     filename = filename,
+        #     filetype = filetype,
+        #     filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename)),
+        #     packet_count = get_capture_count(filename),
+        #     date_added = datetime.datetime.now()
+        #     )
+        #
+        # db.session.add(new_file)
+        # db.session.commit()
+        # db.session.refresh(new_file)
 
         sniffer.join()
-        isRunning = False
-
 
     except Exception as e:
         log('error', 'Exception: %s' % e)
         return render_template('500.html', e=e), 500
-    return json.dumps({'status':200})
+    return json.dumps({'status':200, "temp_id":temp_id,"message":[{'type':"success", "message":template.name + " was stopped now."}]})
 
 @app.route('/run_capture', methods=['POST'])
 @login_required
 def run_capture():
     global sniffer
-    global isRunning
-    global curInterfaces
-    global bpf_filter
+    temp_id = None
+    template = None
 
-    display_filter = None
-    bpf_filter = None
+    if sniffer is not None:
+        template = sniffer.getTemplate()
 
-    if isRunning:
-        return json.dumps({'status':200})
     try:
         params = json.loads(request.form.to_dict()['data'])
+        temp_id = params['temp_id']
 
-        if params['interface'] == '':
-            curInterfaces = ['any']
-        else:
-            curInterfaces = params['interface']
+        if temp_id is None or temp_id == '':
+            return json.dumps({"status":406,"message":[{'type':"warning", "message":"Templte ID was not specified."}]})
 
-        if params['filter'] != '':
-            bpf_filter = params['filter']
+        if template is not None:
+            if template.id != temp_id:
+                return json.dumps({"status":406,"message":[{'type':"warning", "message":"Another process is running. Please stop it and Try again!."}]})
 
     except Exception as e:
-        curInterfaces = ['any']
-        bpf_filter = None
+        return json.dumps({"status":406,"message":[{'type':"warning", "message":e}]})
 
     try:
-        sniffer = PysharkSniffer(curInterfaces, lock, bpf_filter, display_filter, socketio, False)
+        template = Template.query.filter_by(id=temp_id).one()
+
+        if template is None:
+            return json.dumps({"status":406,"message":[{'type':"danger", "message":template.name + " was not exist!"}]})
+
+        sniffer = PysharkSniffer(db, temp_id, socketio)
         sniffer.start()
-        isRunning = True
+
     except Exception as e:
         log('error', 'Exception: %s' % e)
         return render_template('500.html', e=e), 500
-    return json.dumps({'status':200})
+
+    return json.dumps({'status':200,"message":[{'type':"success", "message":template.name + " is running now."}]})
 
 @app.route('/livecapture')
 @login_required
@@ -611,7 +611,9 @@ def livecapture():
    global curInterfaces
    global bpf_filter
 
-   return render_template('livecaptures.html', interfaces=interfaces, curInterfaces=curInterfaces, bpf_filter=bpf_filter)
+   templates = Template.query.all()
+
+   return render_template('livecaptures.html', templates=templates)
 
 @app.route('/api/v1/<token>/delete/<file_id>')
 def api_delete_file(token, file_id):
@@ -736,8 +738,12 @@ def make_shell_context():
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
+#Getting templates
+templates = Template.query.all()
+
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', debug=True, threaded=True)
-    interfaces = get_tshark_interfaces_list()
+    #interfaces = get_tshark_interfaces_list()
     #sniffer.start()
     socketio.run(app, host="0.0.0.0", debug=True)
+    #manager.run()

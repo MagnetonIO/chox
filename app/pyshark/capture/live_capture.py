@@ -1,6 +1,7 @@
 from pyshark.capture.capture import Capture
 from pyshark.tshark.tshark import get_tshark_interfaces
-
+import shlex
+import re
 
 class LiveCapture(Capture):
     """
@@ -8,7 +9,7 @@ class LiveCapture(Capture):
     """
 
     def __init__(self, interface=None, bpf_filter=None, display_filter=None, only_summaries=False, decryption_key=None,
-                 encryption_type='wpa-pwk', output_file=None, decode_as=None, tshark_path=None):
+                 encryption_type='wpa-pwk', output_file=None, decode_as=None, tshark_path=None, extra_params_str=None):
         """
         Creates a new live capturer on a given interface. Does not start the actual capture itself.
 
@@ -29,7 +30,7 @@ class LiveCapture(Capture):
                                           decryption_key=decryption_key, encryption_type=encryption_type,
                                           output_file=output_file, decode_as=decode_as, tshark_path=tshark_path)
         self.bpf_filter = bpf_filter
-        
+        self.extra_params_str = extra_params_str
         if interface is None:
             self.interfaces = get_tshark_interfaces(tshark_path)
         else:
@@ -40,10 +41,17 @@ class LiveCapture(Capture):
         Returns the special tshark parameters to be used according to the configuration of this class.
         """
         params = super(LiveCapture, self).get_parameters(packet_count=packet_count)
-        for interface in self.interfaces:
-            params += ['-i', interface]
-        if self.bpf_filter:
-            params += ['-f', self.bpf_filter]
+        # for interface in self.interfaces:
+        #     params += ['-i', interface]
+        # if self.bpf_filter:
+        #     params += ['-f', self.bpf_filter]
+
+        extra_params = re.sub('tshark\s', '',self.extra_params_str)
+        extra_params = shlex.split(extra_params)
+
+        for param in extra_params:
+            params += [param]
+
         return params
 
     # Backwards compatibility
