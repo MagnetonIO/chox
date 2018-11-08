@@ -521,7 +521,7 @@ def save_tempalte():
             data += '            </div>'
             data += '            <div class="form-group">'
             data += '                <button class="btn btn-primary" type="button" onclick="save_template(' + id + ')">Save</button>'
-            data += '                <button class="btn btn-default" type="button" onclick="delete_template(' + id + ')">Save</button>'
+            data += '                <button class="btn btn-default" type="button" onclick="delete_template(' + id + ')">Delete</button>'
             data += '            </div>'
             data += '        </div></li>'
             data += '    </ul>'
