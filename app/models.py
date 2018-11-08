@@ -71,6 +71,5 @@ class Template(db.Model):
     command = db.Column(db.String(100))
     process_id = db.Column(db.String(20))
     status = db.Column(db.Integer)
-
     def __repr__(self):
-        return '<Tag %r, file_id: %s>\n' % (self.name, self.file_id)
+        return '<Template %r, command: %r>\n' % (self.name, self.command)

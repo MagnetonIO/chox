@@ -235,6 +235,7 @@
                 success: function (response) {
                     var data = JSON.parse(response).new;
                     var template = JSON.parse(response).template;
+                    var new_count = JSON.parse(response).templates_count;
                     if (data !=''){
                         var new_tr;
                         $('#templates_container').append(data);
@@ -250,6 +251,14 @@
                         new_tr +=    '    <img src="static/images/green_btn.png" class="shark_btn run"></img>';
                         new_tr +=    '</td>';
                         new_tr +='</tr>';
+
+                        if (new_count == 0) {
+                            $('#templates_count').text('Empty Device');
+                        } else if (new_count == 1){
+                            $('#templates_count').text(new_count + ' Device');
+                        } else {
+                            $('#templates_count').text(new_count + ' Devices');
+                        }
 
                         $('#template_body').append(new_tr);
                     }
@@ -277,9 +286,18 @@
                 type: 'POST',
                 data: {'data': jsondata},
                 success: function (response) {
+                    var new_count = JSON.parse(response).templates_count;
 
                     $('#main_' + temp_id).remove();
                     $('#template_' + temp_id).remove();
+
+                    if (new_count == 0) {
+                        $('#templates_count').text('Empty Device');
+                    } else if (new_count == 1){
+                        $('#templates_count').text(new_count + ' Device');
+                    } else {
+                        $('#templates_count').text(new_count + ' Devices');
+                    }
 
                     $('#flash').html(flashMessage(JSON.parse(response).message));
                 },

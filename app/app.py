@@ -468,6 +468,7 @@ def livecapture_connect():
 @app.route('/delete_template', methods=['POST'])
 @login_required
 def delete_tempalte():
+
     try:
         params = json.loads(request.form.to_dict()['data'])
         temp_id = params['temp_id']
@@ -477,7 +478,9 @@ def delete_tempalte():
             db.session.delete(template)
             db.session.commit()
 
-            return json.dumps({"status":200,"message":[{'type':"success", "message":"Template was deleted."}]})
+            templates = Template.query.all()
+
+            return json.dumps({"status":200,"message":[{'type':"success", "message":"Template was deleted."}], "templates_count":len(templates)})
         else:
             return json.dumps({"status":200,"message":[{'type':"warning", "message":"Couldn't find the template"}]})
 
@@ -487,12 +490,13 @@ def delete_tempalte():
 @app.route('/save_template', methods=['POST'])
 @login_required
 def save_tempalte():
-    global tempaltes
+
     try:
         params = json.loads(request.form.to_dict()['data'])
         temp_id = params['temp_id']
         name = params['name']
         command = params['command']
+
         if temp_id == "": #new template
             new_template = Template(name=name, command=command, process_id="", status=0)
             db.session.add(new_template)
@@ -516,13 +520,16 @@ def save_tempalte():
             data += '                <input type="text" id="command_' + id + '" class="form-control command" value="' + new_template.command + '">'
             data += '            </div>'
             data += '            <div class="form-group">'
-            data += '                <button class="btn btn-default" type="button" onclick="save_template(' + id + ')">Save</button>'
+            data += '                <button class="btn btn-primary" type="button" onclick="save_template(' + id + ')">Save</button>'
+            data += '                <button class="btn btn-default" type="button" onclick="delete_template(' + id + ')">Save</button>'
             data += '            </div>'
             data += '        </div></li>'
             data += '    </ul>'
             data += '</li>'
 
-            return json.dumps({"status":200,"message":[{'type':"success", "message":"New template was added."}], "new":data, "template":{'id':new_template.id, 'name':new_template.name, 'command':new_template.command}})
+            templates = Template.query.all()
+
+            return json.dumps({"status":200,"message":[{'type':"success", "message":"New template was added."}], "templates_count":len(templates), "new":data, "template":{'id':id, 'name':new_template.name, 'command':new_template.command}})
         else:
             template = Template.query.filter_by(id=temp_id).one()
             template.name = name
