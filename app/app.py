@@ -116,6 +116,7 @@ def logout():
 def home():
 
     form = TempPasswordForm()
+    templates = Template.query.all()
 
     if form.validate_on_submit():
 
@@ -502,7 +503,6 @@ def save_tempalte():
             data += '    </ul>'
             data += '</li>'
 
-            templates = Template.query.all()
             return json.dumps({"status":200,"message":[{'type':"success", "message":"New template was added."}], "new":data})
         else:
             template = Template.query.filter_by(id=temp_id).one()
@@ -530,7 +530,7 @@ def stop_capture():
         template = sniffer.getTemplate()
 
         if template is None:
-            return json.dumps({"status":406,"message":[{'type':"warning", "message":template.name + " isn't started yet."}]})
+            return json.dumps({"status":406,"message":[{'type':"warning", "message":"Template isn't started yet."}]})
 
         if temp_id != template.id:
             return json.dumps({"status":406,"message":[{'type':"warning", "message":template.name + " isn't started yet."}]})
@@ -739,7 +739,7 @@ manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
 #Getting templates
-templates = Template.query.all()
+#templates = Template.query.all()
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', debug=True, threaded=True)
