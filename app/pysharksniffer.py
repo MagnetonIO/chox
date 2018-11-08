@@ -88,7 +88,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
 
         print('stopped')
         self.template = None
-        self.socketio.emit('errordata', {'data': {'temp_id':self.temp_id, "message":[{'type':'warning', 'message':'Incorrect tshark parameters.'}]}}, namespace='/stopcapture')
+        self.socketio.emit('stopcapture', {'data': {'temp_id':self.temp_id, "message":[{'type':'warning', 'message':'Incorrect tshark parameters.'}]}}, namespace='/stopcapture')
         sys.exit()
 
     def getDetail(self, packet):
@@ -210,6 +210,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
             data['dst_ip'] = dst_ip
         except Exception as e:
             print(e)
+
         data['protocol'] = protocol
         data['length'] = pkt_length
         data['detail'] = detail
@@ -218,7 +219,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         data['temp_id'] = self.temp_id
 
         if self.stopped():
-            self.socketio.emit('errordata', {'data': {'temp_id':self.temp_id, "message":[{'type':'success', 'message':self.template.name + " was stopped now."}]}}, namespace='/stopcapture')
+            self.socketio.emit('stopcapture', {'data': {'temp_id':self.temp_id, "message":[{'type':'success', 'message':self.template.name + " was stopped now."}]}}, namespace='/stopcapture')
             print('stopped')
             self.template = None
             sys.exit()
@@ -231,10 +232,7 @@ if __name__ == "__main__":
     lock = threading.Lock()
     #while True:
     sniffer = PysharkSniffer("eth0", lock, False)
-    print("Main sniffer started")
     sniffer.start()
-    #x = raw_input("sdadsa")
     #sniffer.stop()
     #sniffer.join()
-    #print("Main sniffer stopped")
-    #x = raw_input("sdasda")
+

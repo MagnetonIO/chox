@@ -32,61 +32,24 @@ Chox
 						<table class="" data-toggle="table" data-sort-name="no" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[2,10, 20, 50]" data-search="true">
 							<thead>
                                 <tr>
-                                    <th data-field="no" data-sortable="true">#</th>
-                                    <th data-field="type" data-sortable="true">Type</th>
+                                    <th data-field="id" data-sortable="true">#</th>
                                     <th data-field="name" data-sortable="true">Name</th>
+                                    <th data-field="command" data-sortable="true">Command</th>
                                     <th data-field="status" data-sortable="true">Status</th>
                                 </tr>
 							</thead>
 							<tbody>
-								<tr>
-									<td>1</td>
-									<td>Internal Router</td>
-									<td>Router1</td>
+                                {% for template in templates %}
+								<tr id="template_{{ template['id'] }}">
+									<td>{{ template['id'] }}</td>
+									<td>{{ template['name'] }}</td>
+									<td>{{ template['command'] }}</td>
 									<td>
-                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
-                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
+                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}"  class="shark_btn stop" style="display:none;"></img>
+                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" class="shark_btn run"></img>
                                     </td>
 								</tr>
-                                <tr>
-									<td>2</td>
-									<td>Internal Edge Router</td>
-									<td>Router2</td>
-									<td>
-                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
-                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
-                                    </td>
-								</tr>
-
-                                <tr>
-									<td>3</td>
-									<td>Internal Firewall</td>
-									<td>Firewall1</td>
-									<td>
-                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
-                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
-                                    </td>
-								</tr>
-
-                                <tr>
-									<td>4</td>
-									<td>Internal Edge Firewall</td>
-									<td>Firewall2</td>
-									<td>
-                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
-                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
-                                    </td>
-								</tr>
-
-                                <tr>
-									<td>5</td>
-									<td>Switch</td>
-									<td>switch</td>
-									<td>
-                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="" class="shark_btn"></img>
-                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="" class="shark_btn"></img>
-                                    </td>
-								</tr>
+                                {% endfor %}
 							</tbody>
 						</table>
 					</div>
@@ -133,36 +96,36 @@ Chox
 					</div>
 				</div>
 			</div>
-			<div class="col-lg-6 col-md-6">
-				<div class="panel panel-primary" >
-					<div class="panel-heading">Live Capture
-					</div>
-					<div class="panel-body">
-						<table class="" data-toggle="table" data-sort-name="no" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[10, 20, 50]" data-search="true">
-							<thead>
-							<tr>
-								<th data-field="no" data-sortable="true">#</th>
-								<th data-field="type" data-sortable="true">Type</th>
-								<th data-field="name" data-sortable="true">Name</th>
-								<th data-field="status" data-sortable="true">Status</th>
-							</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>1</td>
-									<td>TShark</td>
-									<td>TShark</td>
-									<td>
-                                            <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="stop_btn" class="shark_btn"></img>
-                                            <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="run_btn" class="shark_btn" onclick="run(1)"></img>
-
-                                    </td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
+{#			<div class="col-lg-6 col-md-6">#}
+{#				<div class="panel panel-primary" >#}
+{#					<div class="panel-heading">Live Capture#}
+{#					</div>#}
+{#					<div class="panel-body">#}
+{#						<table class="" data-toggle="table" data-sort-name="no" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[10, 20, 50]" data-search="true">#}
+{#							<thead>#}
+{#							<tr>#}
+{#								<th data-field="no" data-sortable="true">#</th>#}
+{#								<th data-field="type" data-sortable="true">Type</th>#}
+{#								<th data-field="name" data-sortable="true">Name</th>#}
+{#								<th data-field="status" data-sortable="true">Status</th>#}
+{#							</tr>#}
+{#							</thead>#}
+{#							<tbody>#}
+{#								<tr>#}
+{#									<td>1</td>#}
+{#									<td>TShark</td>#}
+{#									<td>TShark</td>#}
+{#									<td>#}
+{#                                            <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="stop_btn" class="shark_btn"></img>#}
+{#                                            <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="run_btn" class="shark_btn" onclick="run(1)"></img>#}
+{##}
+{#                                    </td>#}
+{#								</tr>#}
+{#							</tbody>#}
+{#						</table>#}
+{#					</div>#}
+{#				</div>#}
+{#			</div>#}
 		</div>
         		<!-- Delete Modal -->
 		<div class="modal fade" id="deleteModal">

@@ -158,8 +158,6 @@
         <div id="wrapper">
 
     {% endif %}
-
-
 {% endblock %}
 
 {% block scripts %}
@@ -263,18 +261,21 @@
                     if ( temp_process_id_id == temp_id ){
                         $(this).find('.run').hide();
                         $(this).find('.stop').show();
+                        $('#template_' + temp_id).find('.run').hide();
+                        $('#template_' + temp_id).find('.stop').show();
                     } else {
                         $(this).find('.run').show();
                         $(this).find('.stop').hide();
+                        $('#template_' + temp_id).find('.run').show();
+                        $('#template_' + temp_id).find('.stop').hide();
                     }
 
                 });
             });
 
-            stopsocket.on("errordata", function(msg){
+            stopsocket.on("stopcapture", function(msg){
                 var packet = msg.data;
                 var temp_process_id_id = packet['temp_id'];
-                var eProcess_id = $(this).find('.process').val();
 
                 $('#templates_container .status_container').each(function(index){
 
@@ -283,6 +284,8 @@
                     if ( temp_process_id_id == temp_id ){
                         $(this).find('.run').show();
                         $(this).find('.stop').hide();
+                        $('#template_' + temp_id).find('.run').show();
+                        $('#template_' + temp_id).find('.stop').hide()
 
                         $('#flash').html(flashMessage(packet['message']));
                     }
