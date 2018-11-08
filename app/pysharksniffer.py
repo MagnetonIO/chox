@@ -67,7 +67,9 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
             params += [param]
 
         param_str = ' '.join(params)
-        self.output_file = SAVE_FOLDER_PATH + self.filename
+
+        if self.filename is not None:
+            self.output_file = SAVE_FOLDER_PATH + self.filename
 
         capture = pyshark.LiveCapture(extra_params_str=param_str, output_file=self.output_file)
         capture.set_debug()
