@@ -541,26 +541,28 @@ def stop_capture():
     try:
         [filename, temp_id] = sniffer.stop()
 
-        # filetype = splitext(filename)[1].strip('.')
-        # uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
-        #
-        # new_file = TraceFile(id=str(uuid.uuid4())[:8],
-        #     name=secure_filename(splitext(filename)[0]),
-        #     user_id = current_user.id,
-        #     filename = filename,
-        #     filetype = filetype,
-        #     filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename)),
-        #     packet_count = get_capture_count(filename),
-        #     date_added = datetime.datetime.now()
-        #     )
-        #
-        # db.session.add(new_file)
-        # db.session.commit()
-        # db.session.refresh(new_file)
+        if filename is not None:
+            filetype = splitext(filename)[1].strip('.')
+            uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
+
+            new_file = TraceFile(id=str(uuid.uuid4())[:8],
+                name=secure_filename(splitext(filename)[0]),
+                user_id = current_user.id,
+                filename = filename,
+                filetype = filetype,
+                filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename)),
+                packet_count = get_capture_count(filename),
+                date_added = datetime.datetime.now()
+                )
+
+            db.session.add(new_file)
+            db.session.commit()
+            db.session.refresh(new_file)
 
         sniffer.join()
 
     except Exception as e:
+        print(e)
         log('error', 'Exception: %s' % e)
         return render_template('500.html', e=e), 500
     return json.dumps({'status':200, "temp_id":temp_id,"message":[{'type':"success", "message":template.name + " was stopped now."}]})

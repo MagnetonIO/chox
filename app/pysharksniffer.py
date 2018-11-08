@@ -7,6 +7,7 @@ from datetime import datetime
 from random import random
 from flask_socketio import SocketIO, emit
 from models import Template
+import shlex
 
 SAVE_FOLDER_PATH = 'static/tracefiles/'
 class PysharkSniffer(threading.Thread): # This class starts the PyShark master sniffer that updates a list of communicating APs and a list of established communications
@@ -42,20 +43,34 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
 
     def run(self):
         self.start_time = datetime.now()
-
-        #self.cap = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file=datetime.now().isoformat())
-
         self.frame_no = 0
-        #self.cap.set_debug()
-        self.filename = datetime.strftime(datetime.now(), '%Y%m%d%s')  + '.pcap'
-        self.output_file = SAVE_FOLDER_PATH + self.filename
+        #self.filename = datetime.strftime(datetime.now(), '%Y%m%d%s')  + '.pcap'
+
 
         self.template = Template.query.filter_by(id=self.temp_id).one()
+        extra_params = shlex.split(self.template.command)
 
-        #capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter, output_file = self.output_file)
-        capture = pyshark.LiveCapture(extra_params_str=self.template.command)
+        isNext = False
+        self.filename = None
+
+        params = []
+        for param in extra_params:
+            if isNext:
+                self.filename = param
+                isNext = False
+                continue
+
+            if param == '-w':
+                isNext = True
+                continue
+
+            params += [param]
+
+        param_str = ' '.join(params)
+        self.output_file = SAVE_FOLDER_PATH + self.filename
+
+        capture = pyshark.LiveCapture(extra_params_str=param_str, output_file=self.output_file)
         capture.set_debug()
-        #capture = pyshark.LiveCapture(interface=self.interface, bpf_filter=self.bpf_filter, display_filter=self.display_filter)
 
         isFirst = True
         for p, pid in capture.sniff_continuously():
@@ -141,7 +156,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
     def perPacket(self, packet, pid):
         data = {}
 
-        print(packet)
+        print('received new packet')
 
         time = (datetime.now() - self.start_time).total_seconds()
         pkt_length = packet.captured_length
