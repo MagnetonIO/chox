@@ -199,12 +199,12 @@
                 type: 'POST',
                 data:{'data':jsondata},
                 success: function(response){
-                    var temp_id = JSON.parse(response).temp_id;
+                    /*var temp_id = JSON.parse(response).temp_id;
                     var status_container = $('#status_' + temp_id);
                     $(status_container).find('.run').show();
                     $(status_container).find('.stop').hide();
 
-                    $('#flash').html(flashMessage(JSON.parse(response).message));
+                    $('#flash').html(flashMessage(JSON.parse(response).message));*/
                 },
                 error: function(error){
                     console.log(error);

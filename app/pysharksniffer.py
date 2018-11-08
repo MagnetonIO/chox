@@ -32,7 +32,6 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
 
     def stop(self):
         self._stopper.set()
-        self.template = None
         return [self.filename, self.temp_id]
 
     def stopped(self):
@@ -219,12 +218,13 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         data['temp_id'] = self.temp_id
 
         if self.stopped():
-            sys.exit()
+            self.socketio.emit('errordata', {'data': {'temp_id':self.temp_id, "message":[{'type':'success', 'message':self.template.name + " was stopped now."}]}}, namespace='/stopcapture')
             print('stopped')
             self.template = None
+            sys.exit()
         else:
-
-            self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
+            if self.template is not None:
+                self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
             pass
 
 if __name__ == "__main__":
