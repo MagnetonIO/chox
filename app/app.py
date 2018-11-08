@@ -465,6 +465,25 @@ def upload_file():
 def livecapture_connect():
    print('---connected---')
 
+@app.route('/delete_template', methods=['POST'])
+@login_required
+def delete_tempalte():
+    try:
+        params = json.loads(request.form.to_dict()['data'])
+        temp_id = params['temp_id']
+
+        template = Template.query.filter_by(id=temp_id).one()
+        if template is not None:
+            db.session.delete(template)
+            db.session.commit()
+
+            return json.dumps({"status":200,"message":[{'type':"success", "message":"Template was deleted."}]})
+        else:
+            return json.dumps({"status":200,"message":[{'type':"warning", "message":"Couldn't find the template"}]})
+
+    except Exception as e:
+        return json.dumps({"status":500,"message":[{'type':"danger", "message":"Error occured"}]})
+
 @app.route('/save_template', methods=['POST'])
 @login_required
 def save_tempalte():
@@ -503,7 +522,7 @@ def save_tempalte():
             data += '    </ul>'
             data += '</li>'
 
-            return json.dumps({"status":200,"message":[{'type':"success", "message":"New template was added."}], "new":data})
+            return json.dumps({"status":200,"message":[{'type':"success", "message":"New template was added."}], "new":data, "template":{'id':new_template.id, 'name':new_template.name, 'command':new_template.command}})
         else:
             template = Template.query.filter_by(id=temp_id).one()
             template.name = name

@@ -26,7 +26,7 @@ Chox
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						Devices
-						<small class="pull-right">5 Devices</small>
+						<small class="pull-right">{{ templates|length }} Devices</small>
 					</div>
 					<div class="panel-body">
 						<table class="" data-toggle="table" data-sort-name="no" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[2,10, 20, 50]" data-search="true">
@@ -38,7 +38,7 @@ Chox
                                     <th data-field="status" data-sortable="true">Status</th>
                                 </tr>
 							</thead>
-							<tbody>
+							<tbody id="template_body">
                                 {% for template in templates %}
 								<tr id="template_{{ template['id'] }}">
 									<td>{{ template['id'] }}</td>

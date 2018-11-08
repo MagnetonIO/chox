@@ -95,13 +95,14 @@
                                             </div>
                                             <div class="form-group">
                                                 <button class="btn btn-default" type="button" onclick="save_template()" >Save</button>
+                                                <button class="btn btn-default" type="button" onclick="delete_template('')" >Delete</button>
                                             </div>
                                         </div>
                                     </li>
                                 </ul>
                             </li>
                             {% for template in templates %}
-                                <li class="panel" style="margin-bottom:0px;">
+                                <li class="panel" id="main_{{ template['id'] }}" style="margin-bottom:0px;">
                                     <a data-toggle="collapse" data-parent="#templates_container" href="#{{ template['id'] }}">{{ template['name'] }}</a>
                                     <input type="hidden" class="temp_id" value="{{ template['id'] }}" />
                                     <div class="status_container" id="status_{{ template['id'] }}" style="position:relative">
@@ -118,7 +119,8 @@
                                                 <input type="text" id="command_{{ template['id'] }}" class="form-control command" value="{{ template['command'] }}">
                                             </div>
                                             <div class="form-group">
-                                                <button class="btn btn-default" type="button" onclick="save_template({{ template['id'] }})" >Save</button>
+                                                <button class="btn btn-primary" type="button" onclick="save_template({{ template['id'] }})" >Save</button>
+                                                <button class="btn btn-default" type="button" onclick="delete_template({{ template['id'] }})" >Delete</button>
                                             </div>
                                         </li>
                                     </ul>
@@ -173,6 +175,7 @@
             }
             return html;
         };
+
         function run(temp_id) {
             var jsondata = JSON.stringify({"temp_id":temp_id});
 
@@ -231,10 +234,24 @@
                 data: {'data': jsondata},
                 success: function (response) {
                     var data = JSON.parse(response).new;
+                    var template = JSON.parse(response).template;
                     if (data !=''){
+                        var new_tr;
                         $('#templates_container').append(data);
                         $('#name_new').val('');
                         $('#command_new').val('');
+
+                        new_tr = '<tr id="template_' + template['id'] +'">';
+                        new_tr +=    '<td>' + template['id'] + '</td>';
+                        new_tr +=    '<td>' + template['name'] + '</td>';
+                        new_tr +=    '<td>' + template['command'] +'</td>';
+                        new_tr +=    '<td>';
+                        new_tr +=    '    <img src="/static/images/red_btn.png"  class="shark_btn stop" style="display:none;"></img>';
+                        new_tr +=    '    <img src="static/images/green_btn.png" class="shark_btn run"></img>';
+                        new_tr +=    '</td>';
+                        new_tr +='</tr>';
+
+                        $('#template_body').append(new_tr);
                     }
                     $('#flash').html(flashMessage(JSON.parse(response).message));
                 },
@@ -243,6 +260,35 @@
                 }
             });
         }
+
+        function delete_template(temp_id) {
+            var name;
+            var jsondata;
+
+            if (temp_id == ''){
+                $('#name_new').val('');
+                $('#command_new').val('');
+                return;
+            }
+            jsondata = JSON.stringify({"temp_id": temp_id});
+
+            $.ajax({
+                url: '/delete_template',
+                type: 'POST',
+                data: {'data': jsondata},
+                success: function (response) {
+
+                    $('#main_' + temp_id).remove();
+                    $('#template_' + temp_id).remove();
+
+                    $('#flash').html(flashMessage(JSON.parse(response).message));
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
         $(document).ready(function(){
             var socket = io.connect("http://" + document.domain +':' + location.port + '/livecapture');
             var stopsocket = io.connect("http://" + document.domain +':' + location.port + '/stopcapture');
