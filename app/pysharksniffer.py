@@ -25,7 +25,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         self.socketio = socketio
         # self.bpf_filter = bpf_filter
         # self.display_filter = display_filter
-        # self.output_file = ''
+        self.output_file = None
         self.db = db
         self.temp_id = temp_id
         self.template = None
