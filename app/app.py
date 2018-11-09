@@ -316,8 +316,10 @@ def users():
             flash('You are not permitted to edit users.', 'warning')
             return redirect(url_for('dashboard'))
 
+        templates = Template.query.all()
+
         users = User.query.order_by(User.id).all()
-        return render_template('users.html', form=form, users=users)
+        return render_template('users.html', templates=templates, form=form, users=users)
 
 @app.route('/users/<user_id>', methods=['GET', 'POST'])
 @login_required
