@@ -20,8 +20,12 @@ Chox
 		</div>
 		{% endfor %}
 		<br/>
+        <div class="row">
+			<div class="col-lg-12 col-md-12 flash"></div>
+        </div>
 
         <div class="row">
+
 			<div class="col-lg-12 col-md-12">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
@@ -45,8 +49,8 @@ Chox
 									<td>{{ template['name'] }}</td>
 									<td>{{ template['command'] }}</td>
 									<td>
-                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}"  class="shark_btn stop" style="display:none;"></img>
-                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" class="shark_btn run"></img>
+                                        <img src="{{ url_for('static', filename='/images/red_btn.png') }}"  class="shark_btn stop" onclick="stop({{ template['id'] }})" style="display:none"></img>
+                                        <img src="{{ url_for('static', filename='/images/green_btn.png') }}" class="shark_btn run" onclick="run({{ template['id'] }})"></img>
                                     </td>
 								</tr>
                                 {% endfor %}

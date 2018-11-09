@@ -202,6 +202,8 @@ def captures(file_id):
 
     traceFile = TraceFile.query.get_or_404(file_id)
 
+    templates = Template.query.all()
+
     try:
         tagsForm.tags.data = ', '.join(x.name for x in Tag.query.filter_by(file_id=file_id).all())
     except NoResultFound:
@@ -216,11 +218,11 @@ def captures(file_id):
 
     if isinstance(details, basestring):
         flash(details, 'warning')
-        return render_template('captures.html', traceFile=traceFile, tagsForm=tagsForm, sanitizeForm=sanitizeForm, display_count=display_count)
+        return render_template('captures.html', traceFile=traceFile, tagsForm=tagsForm, templates=templates, sanitizeForm=sanitizeForm, display_count=display_count)
     
     tags = set([x.name for x in Tag.query.all()])
 
-    return render_template('captures.html', traceFile=traceFile, tagsForm=tagsForm, sanitizeForm=sanitizeForm, display_count=display_count, details=details, tags=tags)
+    return render_template('captures.html', traceFile=traceFile, templates=templates, tagsForm=tagsForm, sanitizeForm=sanitizeForm, display_count=display_count, details=details, tags=tags)
 
 
 @app.route('/captures/<file_id>/packetDetail/<int:number>')
@@ -348,7 +350,9 @@ def user(user_id):
 
         form.role.data = user.role
 
-        return render_template('users.html', form=form, user=user)
+        templates = Template.query.all()
+
+        return render_template('users.html', templates=templates, form=form, user=user)
 
 @app.route('/users/<user_id>/delete/')
 @login_required
@@ -395,7 +399,9 @@ def profile():
         
         form.email.data = user.email
 
-        return render_template('profile.html', form=form)
+        templates = Template.query.all()
+
+        return render_template('profile.html', templates=templates, form=form)
 
 
 @app.route('/api/v1/<token>/upload', methods=['POST', 'PUT'])

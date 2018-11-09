@@ -78,7 +78,7 @@
             <div class="panel-heading">Templates</div>
             <div class="panel-body">
                 <div class="row">
-                    <div id="flash"></div>
+                    <div class="flash"></div>
 
                     <div class="col-md-12">
                         <ul class="nav nav-stacked" id="templates_container">
@@ -184,7 +184,7 @@
                 type: 'POST',
                 data:{'data':jsondata},
                 success: function(response){
-                    $('#flash').html(flashMessage(JSON.parse(response).message));
+                    $('.flash').html(flashMessage(JSON.parse(response).message));
                 },
                 error: function(error){
                     console.log(error);
@@ -262,7 +262,7 @@
 
                         $('#template_body').append(new_tr);
                     }
-                    $('#flash').html(flashMessage(JSON.parse(response).message));
+                    $('.flash').html(flashMessage(JSON.parse(response).message));
                 },
                 error: function (error) {
                     console.log(error);
@@ -299,7 +299,7 @@
                         $('#templates_count').text(new_count + ' Devices');
                     }
 
-                    $('#flash').html(flashMessage(JSON.parse(response).message));
+                    $('.flash').html(flashMessage(JSON.parse(response).message));
                 },
                 error: function (error) {
                     console.log(error);
@@ -351,7 +351,7 @@
                         $('#template_' + temp_id).find('.run').show();
                         $('#template_' + temp_id).find('.stop').hide()
 
-                        $('#flash').html(flashMessage(packet['message']));
+                        $('.flash').html(flashMessage(packet['message']));
                     }
 
                 });
