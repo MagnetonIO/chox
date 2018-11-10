@@ -576,22 +576,31 @@ def stop_capture():
         [filename, temp_id] = sniffer.stop()
 
         if filename is not None:
-            filetype = splitext(filename)[1].strip('.')
-            uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
+            file = TraceFile.query.filter_by(filename=filename).first()
 
-            new_file = TraceFile(id=str(uuid.uuid4())[:8],
-                name=secure_filename(splitext(filename)[0]),
-                user_id = current_user.id,
-                filename = filename,
-                filetype = filetype,
-                filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename)),
-                packet_count = get_capture_count(filename),
-                date_added = datetime.datetime.now()
-                )
+            if file is not None:
+                file.user_id = current_user.id
+                file.filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename))
+                file.packet_count = get_capture_count(filename)
+                file.date_added = datetime.datetime.now()
+                db.session.commit()
+            else:
+                filetype = splitext(filename)[1].strip('.')
+                uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
 
-            db.session.add(new_file)
-            db.session.commit()
-            db.session.refresh(new_file)
+                new_file = TraceFile(id=str(uuid.uuid4())[:8],
+                    name=secure_filename(splitext(filename)[0]),
+                    user_id = current_user.id,
+                    filename = filename,
+                    filetype = filetype,
+                    filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename)),
+                    packet_count = get_capture_count(filename),
+                    date_added = datetime.datetime.now()
+                    )
+
+                db.session.add(new_file)
+                db.session.commit()
+                db.session.refresh(new_file)
 
         sniffer.join()
 
