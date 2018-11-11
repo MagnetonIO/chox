@@ -569,6 +569,8 @@ def stop_capture():
         if temp_id != template.id:
             return json.dumps({"status":406,"message":[{'type':"warning", "message":template.name + " isn't started yet."}]})
 
+        template_name = template.name
+
     except Exception as e:
         return json.dumps({"status":406,"message":[{'type':"warning", "message":e}]})
 
@@ -608,7 +610,7 @@ def stop_capture():
         print(e)
         log('error', 'Exception: %s' % e)
         return render_template('500.html', e=e), 500
-    return json.dumps({'status':200, "temp_id":temp_id,"message":[{'type':"success", "message":template.name + " was stopped now."}]})
+    return json.dumps({'status':200, "temp_id":temp_id,"message":[{'type':"success", "message":template_name + " was stopped now."}]})
 
 @app.route('/run_capture', methods=['POST'])
 @login_required
