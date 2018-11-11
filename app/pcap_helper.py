@@ -74,7 +74,7 @@ def decode_capture_file_summary(traceFile, display_filter=None):
 			details['stats']['breakdown'][packet.protocol] = 1
 
 	try:
-		cap.apply_on_packets(decode_packet, timeout=10)
+		cap.apply_on_packets(decode_packet)
 	except:
 		return 0, 'Capture File is too large, please try downloading and analyzing locally.'
 
