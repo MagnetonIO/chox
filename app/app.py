@@ -544,7 +544,32 @@ def save_tempalte():
             template.command = command
             db.session.commit()
 
-            return json.dumps({"status":200,"message":[{'type':"success", "message":"Template was saved."}], "new":''})
+            id = str(template.id)
+
+            data = '<li class="panel template">'
+            data += '    <a data-toggle="collapse" data-parent="#templates_container" href="#' + id + '">' + template.name + '</a>'
+            data += '    <input type="hidden" class="temp_id" value="' + id + '">'
+            data += '    <div class="status_container" id="status_' + id + '" style="position:relative">'
+            data += '        <img src="/static/images/green_btn.png" id="" class="shark_btn run" onclick="run(' + id + ')" >'
+            data += '        <img src="/static/images/red_btn.png" id="" class="shark_btn stop" onclick="stop(' + id + ')" >'
+            data += '    </div>'
+            data += '    <ul id="' + id + '" class="collapse template">'
+            data += '        <li><div class="form-group">'
+            data += '            <div class="form-group">'
+            data += '                <input type="text" id="name_' + id + '" class="form-control command" value="' + template.name + '">'
+            data += '            </div>'
+            data += '            <div class="form-group">'
+            data += '                <input type="text" id="command_' + id + '" class="form-control command" value="' + template.command + '">'
+            data += '            </div>'
+            data += '            <div class="form-group">'
+            data += '                <button class="btn btn-primary" type="button" onclick="save_template(' + id + ')">Save</button>'
+            data += '                <button class="btn btn-default" type="button" onclick="delete_template(' + id + ')">Delete</button>'
+            data += '            </div>'
+            data += '        </div></li>'
+            data += '    </ul>'
+            data += '</li>'
+
+            return json.dumps({"status":200,"message":[{'type':"success", "message":"Template was saved."}], "new":data, "template":{'id':id, 'name':template.name, 'command':template.command}})
     except Exception as e:
         return json.dumps({"status":500,"message":[{'type':"danger", "message":"Error occured"}]})
 
@@ -792,5 +817,5 @@ if __name__ == '__main__':
     # app.run(host='0.0.0.0', debug=True, threaded=True)
     #interfaces = get_tshark_interfaces_list()
     #sniffer.start()
-    #socketio.run(app, host="0.0.0.0", debug=True)
-    manager.run()
+    socketio.run(app, host="0.0.0.0", debug=True)
+    #manager.run()

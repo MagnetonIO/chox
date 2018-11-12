@@ -238,9 +238,11 @@
                     var new_count = JSON.parse(response).templates_count;
                     if (data !=''){
                         var new_tr;
+                        $('#templates_container').find('#' + template['id']).parent().remove();
                         $('#templates_container').append(data);
                         $('#name_new').val('');
                         $('#command_new').val('');
+                        $('#template_body').find('#template_' + template['id']).remove();
 
                         new_tr = '<tr id="template_' + template['id'] +'">';
                         new_tr +=    '<td>' + template['id'] + '</td>';
