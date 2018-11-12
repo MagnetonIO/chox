@@ -58,6 +58,10 @@ isEFirewallRunning = False
 isSwitchRunning = False
 templates = []
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))

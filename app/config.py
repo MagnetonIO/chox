@@ -10,4 +10,4 @@ class ProductionConfig(Config):
     pass
     
 class DevelopmentConfig(Config):
-	SQLALCHEMY_DATABASE_URI = 'sqlite:///chox.sqlite3'
+	SQLALCHEMY_DATABASE_URI = 'sqlite:///chox.sqlite3?check_same_thread=False'
