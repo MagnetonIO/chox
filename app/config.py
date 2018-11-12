@@ -10,4 +10,4 @@ class ProductionConfig(Config):
     pass
     
 class DevelopmentConfig(Config):
-	SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@localhost/postgres'
+	SQLALCHEMY_DATABASE_URI = 'sqlite:///chox.sqlite3'

@@ -792,5 +792,5 @@ if __name__ == '__main__':
     # app.run(host='0.0.0.0', debug=True, threaded=True)
     #interfaces = get_tshark_interfaces_list()
     #sniffer.start()
-    socketio.run(app, host="0.0.0.0", debug=True)
-    #manager.run()
+    #socketio.run(app, host="0.0.0.0", debug=True)
+    manager.run()
