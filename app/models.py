@@ -39,6 +39,8 @@ class TraceFile(db.Model):
     filetype = db.Column(db.String(64))
     packet_count = db.Column(db.Integer)
     date_added = db.Column(db.DateTime)
+    date_deleted = db.Column(db.DateTime)
+    status = db.Column(db.Integer(1))
 
     def __repr__(self):
         return '<TraceFile %r, filename: %r>\n' % (self.name, self.filename)

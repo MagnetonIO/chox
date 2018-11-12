@@ -159,7 +159,7 @@ def home():
             # For future use of filtering just one users' files
             # traceFiles = [TraceFile.query.filter_by(user_id=current_user.id).filter_by(id=x.file_id).first() for x in Tag.query.filter_by(name=tag).all()]
         else:
-            traceFiles = TraceFile.query.all()
+            traceFiles = TraceFile.query.filter_by(status=1).all()
             # For future use of filtering just one users' files
             # traceFiles = TraceFile.query.filter_by(user_id=current_user.id).all()
 
@@ -603,7 +603,7 @@ def stop_capture():
         [filename, temp_id] = sniffer.stop()
 
         if filename is not None:
-            file = TraceFile.query.filter_by(filename=filename).first()
+            file = TraceFile.query.filter_by(filename=filename, status=1).first()
 
             if file is not None:
                 file.user_id = current_user.id
@@ -622,7 +622,8 @@ def stop_capture():
                     filetype = filetype,
                     filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, filename)),
                     packet_count = get_capture_count(filename),
-                    date_added = datetime.datetime.now()
+                    date_added = datetime.datetime.now(),
+                    status=1
                     )
 
                 db.session.add(new_file)
@@ -687,6 +688,16 @@ def livecapture():
 
    return render_template('livecaptures.html', templates=templates)
 
+@app.route('/archive')
+@login_required
+def archive():
+    templates = Template.query.all()
+    deletedFiles = TraceFile.query.filter_by(status=0).all()
+
+    return render_template('archive.html', deletedFiles=deletedFiles, templates=templates)
+
+@app.route('/savetags/<file_id>', methods=['POST'])
+
 @app.route('/api/v1/<token>/delete/<file_id>')
 def api_delete_file(token, file_id):
 
@@ -703,7 +714,9 @@ def api_delete_file(token, file_id):
 
     if token == user.token:
         Tag.query.filter_by(file_id=file_id).delete()
-        TraceFile.query.filter_by(id=file_id).delete()
+        #TraceFile.query.filter_by(id=file_id).delete()
+        traceFile.status = 0
+        traceFile.date_deleted = datetime.datetime.now()
 
         db.session.commit()
 

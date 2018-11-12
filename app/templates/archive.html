@@ -1,0 +1,137 @@
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+{{ super()}}
+Chox
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+
+
+<div class="content">
+
+	<div class="col-lg-12">
+		{% for category, message in get_flashed_messages(with_categories=true) %}
+		<div class="alert alert-{{ category }}">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			{{ message }}
+		</div>
+		{% endfor %}
+		<br/>
+        <div class="row">
+			<div class="col-lg-12 col-md-12 flash"></div>
+        </div>
+
+		<div class="row">
+
+            <div class="col-lg-6 col-md-6 tracefiles">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						Deleted Files
+					</div>
+					<div class="panel-body tracefiles">
+						<table class="" data-toggle="table" data-sort-name="date" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[10, 20, 50]" data-search="true">
+							<thead>
+							<tr>
+								<th data-field="name" data-sortable="true">Name</th>
+								<th data-field="type" data-sortable="true">Type</th>
+								<th data-field="packets" data-sortable="true"># Packets</th>
+								<th data-field="size" data-sortable="true">Size (KB)</th>
+								<th data-field="date" data-sortable="true">Added</th>
+								<th data-field="user" data-sortable="true">User</th>
+                                <th data-field="del" data-sortable="true">Deleted</th>
+							</tr>
+							</thead>
+							<tbody>
+							{% for deletedFile in deletedFiles %}
+								<tr>
+									<td>{{ deletedFile.name }}</td>
+									<td>{{ deletedFile.filetype }}</td>
+									<td>{{ deletedFile.packet_count|format_comma }}</td>
+									<td>{{ ((deletedFile.filesize|float) / 1024|float)|format_comma }}</td>
+									<td>{{ deletedFile.date_added.strftime('%b %d, %Y %I:%M%p') }}</td>
+									<td>{{ deletedFile.username.username }}</td>
+									<td>{{ deletedFile.date_deleted.strftime('%b %d, %Y %I:%M%p') }}</td>
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+{#			<div class="col-lg-6 col-md-6">#}
+{#				<div class="panel panel-primary" >#}
+{#					<div class="panel-heading">Live Capture#}
+{#					</div>#}
+{#					<div class="panel-body">#}
+{#						<table class="" data-toggle="table" data-sort-name="no" data-sort-order="desc" data-show-columns="true" data-pagination="true" data-page-list="[10, 20, 50]" data-search="true">#}
+{#							<thead>#}
+{#							<tr>#}
+{#								<th data-field="no" data-sortable="true">#</th>#}
+{#								<th data-field="type" data-sortable="true">Type</th>#}
+{#								<th data-field="name" data-sortable="true">Name</th>#}
+{#								<th data-field="status" data-sortable="true">Status</th>#}
+{#							</tr>#}
+{#							</thead>#}
+{#							<tbody>#}
+{#								<tr>#}
+{#									<td>1</td>#}
+{#									<td>TShark</td>#}
+{#									<td>TShark</td>#}
+{#									<td>#}
+{#                                            <img src="{{ url_for('static', filename='/images/red_btn.png') }}" id="stop_btn" class="shark_btn"></img>#}
+{#                                            <img src="{{ url_for('static', filename='/images/green_btn.png') }}" id="run_btn" class="shark_btn" onclick="run(1)"></img>#}
+{##}
+{#                                    </td>#}
+{#								</tr>#}
+{#							</tbody>#}
+{#						</table>#}
+{#					</div>#}
+{#				</div>#}
+{#			</div>#}
+		</div>
+        		<!-- Delete Modal -->
+		<div class="modal fade" id="deleteModal">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title">Delete Capture File</h4>
+		      </div>
+		      <div class="modal-body">
+		        <p></p>
+		      </div>
+		      <div class="modal-footer">
+		      	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    			<button type="button" class="btn btn-danger"><a id="confirmDelete">Confirm Delete</a></button>
+		      </div>
+		    </div><!-- /.modal-content -->
+		  </div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+
+	</div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script type="text/javascript">
+	$(document).ready(function(){
+
+        $('.deleteButton').on('click', function(){
+			var file_id = $(this).data('id');
+			var file_name = $(this).data('name');
+			$('#deleteModal .modal-body p').html('Are you sure you want to delete ' + file_name + '?');
+			$('#confirmDelete').attr('href', 'captures/delete/' + file_id);
+		});
+
+        //$('button.dropdown-toggle').dropdown();
+
+	});
+</script>
+{% endblock %}
