@@ -70,7 +70,7 @@ def load_user(user_id):
 
 def get_uuid():
     #return base64.b64encode(hashlib.sha256( str(random.getrandbits(256)) ).digest(), random.choice(['rA','aZ','gQ','hH','hG','aR','DD'])).rstrip('==')
-    return base64.urlsafe_b64encode('test'.encode('UTF-8')).decode('ascii')
+    return hashlib.sha256(str(random.getrandbits(256)).encode('utf-8')).hexdigest()
 
 # Create DB tables and default admin user if they don't exist
 def init_db(username='admin', password='chox'):
