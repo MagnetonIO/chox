@@ -157,7 +157,7 @@
                 window.location.href= window.location.pathname.split('?')[0];
             });
 
-            //$('button.dropdown-toggle').dropdown();
+            $('button.dropdown-toggle').dropdown();
             $(".bootstrap-tagsinput input").typeahead({ source:tag_list, confirmKeys: [13, 44] });
 
             $('.fixed-table-container').css('height', $('.top_panel').height()-60);
@@ -296,7 +296,7 @@
                 }
             });
 
-            //window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
+            window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
             $('.packets').css('width', 'calc(100vw - 50px) - $(".cd-side-nav").width()');
             $('#custom-toolbar').css('width', 'calc(100vw - 50px) - $(".cd-side-nav").width()');
             $('.fixed-table-container').css('width', 'calc(100vw - 50px) - $(".cd-side-nav").width()');

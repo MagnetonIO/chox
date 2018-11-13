@@ -77,35 +77,6 @@ Chox
 			</div>-->
 		</div>
 
-
-
-		<!-- Temp Password Modal -->
-		<div class="modal fade" id="tempPasswordModal">
-		  <div class="modal-dialog">
-		    <div class="modal-content">
-		      <div class="modal-header">
-
-		        <h4 class="modal-title">Temporary Password</h4>
-		      </div>
-		      <div class="modal-body">
-		      	<p>Hi {{current_user.username|upper }}, you currently have a temporary password and must change it to continue.</p>
-		        <form class="form" method="post" role="form">
-		          {{ form.hidden_tag() }}
-		          {{ wtf.form_errors(form, hiddens="only") }}
-
-		          {{ wtf.form_field(form.temp_password) }}
-		          {{ wtf.form_field(form.new_password1) }}
-		          {{ wtf.form_field(form.new_password2) }}
-		      </div>
-		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-		        {{ wtf.form_field(form.submit, button_map={'submit': 'primary'}) }}
-		      </div>
-		        </form>
-		    </div><!-- /.modal-content -->
-		  </div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
-
 		<!-- Delete Modal -->
 		<div class="modal fade" id="deleteModal">
 		  <div class="modal-dialog">
@@ -150,16 +121,6 @@ Chox
 
 	$(document).ready(function(){
 
-		{% if current_user.temp_password == True %}
-
-			$('#tempPasswordModal').on('shown.bs.modal', function (e) {
-				$('input#temp_password').focus();
-			});
-
-			$('#tempPasswordModal').modal(show=true);
-
-		{% endif %}
-
 		$('.deleteButton').on('click', function(){
 			var file_id = $(this).data('id');
 			var file_name = $(this).data('name');
@@ -179,9 +140,9 @@ Chox
 			  }
 		});
 
-		//$('button.dropdown-toggle').dropdown();
+		$('button.dropdown-toggle').dropdown();
 
-		//window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
+		window.setTimeout(function() { $(".alert").alert('close'); }, 5000);
 
 	});
 </script>

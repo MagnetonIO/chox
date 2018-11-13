@@ -173,13 +173,10 @@ def home():
 
         return render_template('home.html', form=form, data=deviceStatus, traceFiles=traceFiles, tags=tags, templates=templates)
 
-@app.route('/pcap')
+@app.route('/pcap', methods=['GET', 'POST'])
 @login_required
 def pcap():
-
-    form = TempPasswordForm()
-
-
+    templates = Template.query.all()
     tag = request.args.get('tag')
 
     if tag:
@@ -193,7 +190,7 @@ def pcap():
 
     tags = set([x.name for x in Tag.query.all()])
 
-    return render_template('pcap.html', form=form, traceFiles=traceFiles, tags=tags)
+    return render_template('pcap.html', templates=templates, traceFiles=traceFiles, tags=tags)
 
 @app.route('/captures/<file_id>')
 @login_required
@@ -518,7 +515,7 @@ def save_tempalte():
             db.session.commit()
             id = str(new_template.id)
 
-            data = '<li class="panel template">'
+            data = '<li class="panel" id="main_' + id + '">'
             data += '    <a data-toggle="collapse" data-parent="#templates_container" href="#' +  id + '">' + new_template.name + '</a>'
             data += '    <input type="hidden" class="temp_id" value="' + id + '">'
             data += '    <div class="status_container" id="status_' + id + '" style="position:relative">'
@@ -552,7 +549,7 @@ def save_tempalte():
 
             id = str(template.id)
 
-            data = '<li class="panel template">'
+            data = '<li class="panel" id="main_' + id + '">'
             data += '    <a data-toggle="collapse" data-parent="#templates_container" href="#' + id + '">' + template.name + '</a>'
             data += '    <input type="hidden" class="temp_id" value="' + id + '">'
             data += '    <div class="status_container" id="status_' + id + '" style="position:relative">'
