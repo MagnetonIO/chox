@@ -76,6 +76,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         isFirst = True
         for p, pid in capture.sniff_continuously():
             if isFirst:
+                print('Started capuring')
                 try:
 
                     self.template.process_id = pid
