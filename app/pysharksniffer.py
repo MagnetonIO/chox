@@ -76,7 +76,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         data = {}
         data['temp_id'] = self.temp_id
         isFirst = True
-        self.socketio.emit('newdata', {'data': None}, namespace='/livecapture')
+        self.socketio.emit('newdata', {'data': data}, namespace='/livecapture')
 
         for p, pid in capture.sniff_continuously():
             if isFirst:

@@ -175,8 +175,8 @@
                 var packet = msg.data;
                 console.log("Received data" + packet);
 
-                if (isNaN(packet)) return;
-                
+                if (isNaN(packet['pid'])) return;
+
                 var new_record = '';
 
                 if (packet.protocol == 'HTTP') {
