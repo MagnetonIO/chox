@@ -187,7 +187,7 @@ def pcap():
         # For future use of filtering just one users' files
         # traceFiles = [TraceFile.query.filter_by(user_id=current_user.id).filter_by(id=x.file_id).first() for x in Tag.query.filter_by(name=tag).all()]
     else:
-        traceFiles = TraceFile.query.all()
+        traceFiles = TraceFile.query.filter_by(status=1).all()
         # For future use of filtering just one users' files
         # traceFiles = TraceFile.query.filter_by(user_id=current_user.id).all()
 
@@ -298,7 +298,7 @@ def users():
             flash('You are not permitted to add users.', 'warning')
             return redirect(url_for('users'))
 
-        if form.role.data not in ['admin', 'user']:
+        if form.role.data not in ['admin']:
             flash('%s is not a valid role.' % form.role.data, 'warning')
             return redirect(url_for('users'))
 
@@ -335,7 +335,7 @@ def user(user_id):
             flash('You are not permitted to edit users.', 'warning')
             return redirect(url_for('users'))
 
-        if form.role.data not in ['admin', 'user']:
+        if form.role.data not in ['admin']:
             flash('%s is not a valid role.' % form.role.data, 'warning')
             return redirect(url_for('users'))
 

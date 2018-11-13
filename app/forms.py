@@ -15,11 +15,11 @@ class AddUser(Form):
     username = StringField('Username', validators=[Required()])
     # email = StringField('Email Address', validators=[Email(), optional_validation])
     password = PasswordField('Temporary Password')
-    role = SelectField('Role', choices=[('admin','Admin'),('user', 'User')])
+    role = SelectField('Role', choices=[('admin','Admin')])
     submit = SubmitField('Add')
 
 class EditUser(Form):
-    role = SelectField('Role', choices=[('admin', 'Admin'), ('user', 'User')])
+    role = SelectField('Role', choices=[('admin', 'Admin')])
     submit = SubmitField('Save')
 
 class EditTags(Form):
