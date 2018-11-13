@@ -441,7 +441,8 @@ def api_upload_file(token):
             filetype = filetype,
             filesize = os.path.getsize(os.path.join(UPLOAD_FOLDER, uuid_filename)),
             packet_count = get_capture_count(uuid_filename),
-            date_added = datetime.datetime.now()
+            date_added = datetime.datetime.now(),
+            status=1
             )
 
         db.session.add(new_file)
@@ -514,6 +515,7 @@ def save_tempalte():
             db.session.add(new_template)
             db.session.flush()
             db.session.refresh(new_template)
+            db.session.commit()
             id = str(new_template.id)
 
             data = '<li class="panel template">'
