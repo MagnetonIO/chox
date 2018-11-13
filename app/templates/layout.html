@@ -249,8 +249,8 @@
                         new_tr +=    '<td>' + template['name'] + '</td>';
                         new_tr +=    '<td>' + template['command'] +'</td>';
                         new_tr +=    '<td>';
-                        new_tr +=    '    <img src="/static/images/red_btn.png"  class="shark_btn stop" style="display:none;"></img>';
-                        new_tr +=    '    <img src="static/images/green_btn.png" class="shark_btn run"></img>';
+                        new_tr +=    '    <img src="/static/images/red_btn.png"  class="shark_btn stop" style="display:none;" onclick="stop(' + template['id'] +')"></img>';
+                        new_tr +=    '    <img src="static/images/green_btn.png" class="shark_btn run" onclick="run(' + template['id'] +')"></img>';
                         new_tr +=    '</td>';
                         new_tr +='</tr>';
 
