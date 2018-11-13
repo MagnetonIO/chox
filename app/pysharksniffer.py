@@ -73,7 +73,11 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         capture = pyshark.LiveCapture(extra_params_str=param_str, output_file=self.output_file)
         capture.set_debug()
 
+        data = {}
+        data['temp_id'] = self.temp_id
         isFirst = True
+        self.socketio.emit('newdata', {'data': None}, namespace='/livecapture')
+
         for p, pid in capture.sniff_continuously():
             if isFirst:
                 print('Started capuring')
