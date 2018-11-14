@@ -715,7 +715,7 @@ def api_delete_file(token, file_id):
         return json.dumps({"status":404,"message":"Capture not found.", "id": file_id}), 404
 
 
-    if token == user.token:
+    if current_user.role == 'admin':
         Tag.query.filter_by(file_id=file_id).delete()
         #TraceFile.query.filter_by(id=file_id).delete()
         traceFile.status = 0
