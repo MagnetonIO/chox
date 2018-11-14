@@ -118,27 +118,25 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
 
         print('stopped')
 
-        filename = self.output_file
-
-        if filename is not None:
-            file = TraceFile.query.filter_by(filename=filename, status=1).first()
+        if self.filename is not None:
+            file = TraceFile.query.filter_by(filename=self.filename, status=1).first()
 
             if file is not None:
                 file.user_id = self.user_id
-                file.filesize = os.path.getsize(filename)
-                file.packet_count = get_capture_count(filename)
+                file.filesize = os.path.getsize(SAVE_FOLDER_PATH + self.filename)
+                file.packet_count = get_capture_count(self.filename)
                 file.date_added = datetime.now()
                 self.db.session.commit()
             else:
-                filetype = splitext(filename)[1].strip('.')
+                filetype = splitext(self.filename)[1].strip('.')
                 uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
 
                 new_file = TraceFile(id=str(uuid.uuid4())[:8],
-                    name=secure_filename(splitext(filename)[0]),
+                    name=secure_filename(splitext(self.filename)[0]),
                     user_id = self.user_id,
-                    filename = filename,
+                    filename = self.filename,
                     filetype = filetype,
-                    filesize = os.path.getsize(filename),
+                    filesize = os.path.getsize(SAVE_FOLDER_PATH + self.filename),
                     packet_count = get_capture_count(self.filename),
                     date_added = datetime.now(),
                     status=1
