@@ -671,7 +671,7 @@ def run_capture():
         if template is None:
             return json.dumps({"status":406,"message":[{'type':"danger", "message":template.name + " was not exist!"}]})
 
-        sniffer = PysharkSniffer(db, temp_id, socketio)
+        sniffer = PysharkSniffer(current_user.id, db, temp_id, socketio)
         sniffer.start()
 
     except Exception as e:

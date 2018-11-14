@@ -1,3 +1,5 @@
+import os, uuid
+from os.path import splitext
 import sys
 import pyshark
 import threading
@@ -6,10 +8,13 @@ import time
 from datetime import datetime
 from random import random
 from flask_socketio import SocketIO, emit
-from models import Template
+from models import Template, TraceFile
 import shlex
+from pcap_helper import get_capture_count
+from werkzeug import secure_filename
 
 SAVE_FOLDER_PATH = 'static/tracefiles/'
+
 class ProcessStatus(threading.Thread):
     def __init__(self, socketio, sleep, temp_id):
         threading.Thread.__init__(self)
@@ -37,10 +42,11 @@ class ProcessStatus(threading.Thread):
         return self._stopper.isSet()
 
 class PysharkSniffer(threading.Thread): # This class starts the PyShark master sniffer that updates a list of communicating APs and a list of established communications
-    def __init__(self, db, temp_id, socketio):
+    def __init__(self, user_id, db, temp_id, socketio):
         threading.Thread.__init__(self)
         self.processStatus = ProcessStatus(socketio,3, temp_id)
         self._stopper = threading.Event()
+        self.user_id = user_id
         self.on = False
         self.socketio = socketio
         self.output_file = None
@@ -111,8 +117,40 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         self.processStatus.join()
 
         print('stopped')
+
+        filename = self.output_file
+
+        if filename is not None:
+            file = TraceFile.query.filter_by(filename=filename, status=1).first()
+
+            if file is not None:
+                file.user_id = self.user_id
+                file.filesize = os.path.getsize(filename)
+                file.packet_count = get_capture_count(filename)
+                file.date_added = datetime.datetime.now()
+                self.db.session.commit()
+            else:
+                filetype = splitext(filename)[1].strip('.')
+                uuid_filename = '.'.join([str(uuid.uuid4()),filetype])
+
+                new_file = TraceFile(id=str(uuid.uuid4())[:8],
+                    name=secure_filename(splitext(filename)[0]),
+                    user_id = self.user_id,
+                    filename = filename,
+                    filetype = filetype,
+                    filesize = os.path.getsize(filename),
+                    packet_count = get_capture_count(filename),
+                    date_added = datetime.datetime.now(),
+                    status=1
+                    )
+
+                self.db.session.add(new_file)
+                self.db.session.commit()
+                self.db.session.refresh(new_file)
+
         self.template = None
-        self.socketio.emit('stopcapture', {'data': {'temp_id':self.temp_id, "message":[{'type':'warning', 'message':'Incorrect tshark parameters.'}]}}, namespace='/stopcapture')
+        self.socketio.emit('stopcapture', {'data': {'temp_id':self.temp_id, "message":[{'type':'success', 'message':"Device was stopped now."}]}}, namespace='/stopcapture')
+        #self.socketio.emit('stopcapture', {'data': {'temp_id':self.temp_id, "message":[{'type':'warning', 'message':'Incorrect tshark parameters.'}]}}, namespace='/stopcapture')
         sys.exit()
 
     def getDetail(self, packet):
@@ -243,7 +281,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
         data['temp_id'] = self.temp_id
 
         if self.stopped():
-            self.socketio.emit('stopcapture', {'data': {'temp_id':self.temp_id, "message":[{'type':'success', 'message':self.template.name + " was stopped now."}]}}, namespace='/stopcapture')
+            #self.socketio.emit('stopcapture', {'data': {'temp_id':self.temp_id, "message":[{'type':'success', 'message':self.template.name + " was stopped now."}]}}, namespace='/stopcapture')
             print('stopped')
             sys.exit()
         else:
