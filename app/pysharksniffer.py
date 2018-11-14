@@ -127,7 +127,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
                 file.user_id = self.user_id
                 file.filesize = os.path.getsize(filename)
                 file.packet_count = get_capture_count(filename)
-                file.date_added = datetime.datetime.now()
+                file.date_added = datetime.now()
                 self.db.session.commit()
             else:
                 filetype = splitext(filename)[1].strip('.')
@@ -140,7 +140,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
                     filetype = filetype,
                     filesize = os.path.getsize(filename),
                     packet_count = get_capture_count(self.filename),
-                    date_added = datetime.datetime.now(),
+                    date_added = datetime.now(),
                     status=1
                     )
 
