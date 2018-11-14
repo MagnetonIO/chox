@@ -139,7 +139,7 @@ class PysharkSniffer(threading.Thread): # This class starts the PyShark master s
                     filename = filename,
                     filetype = filetype,
                     filesize = os.path.getsize(filename),
-                    packet_count = get_capture_count(filename),
+                    packet_count = get_capture_count(self.filename),
                     date_added = datetime.datetime.now(),
                     status=1
                     )
