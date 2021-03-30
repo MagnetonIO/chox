@@ -16,7 +16,7 @@ Logbook==0.7.0
 Mako==0.9.1
 Markdown==2.3.1
 MarkupSafe==0.18
-Pygments==1.6
+Pygments==2.7.4
 SQLAlchemy==0.8.4
 SQLAlchemy-Utils==0.26.16
 WTForms==1.0.5
