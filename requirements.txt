@@ -41,7 +41,7 @@ itsdangerous==0.23
 lxml==3.4.0
 paramiko==1.12.2
 psycopg2
-py==1.4.26
+py==1.10.0
 pycrypto==2.6.1
 pyshark==0.3.3
 python-dateutil==2.2
