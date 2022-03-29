@@ -39,7 +39,7 @@ intervals==0.3.1
 ipaddress==1.0.6
 itsdangerous==0.23
 lxml==3.4.0
-paramiko==1.12.2
+paramiko==2.10.1
 psycopg2
 py==1.4.26
 pycrypto==2.6.1
