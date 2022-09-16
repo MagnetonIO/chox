@@ -13,7 +13,7 @@ Flask-WTF==0.9.4
 ForgeryPy==0.1
 Jinja2==2.7.1
 Logbook==0.7.0
-Mako==0.9.1
+Mako==1.2.2
 Markdown==2.3.1
 MarkupSafe==0.18
 Pygments==1.6
